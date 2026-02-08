@@ -347,41 +347,7 @@
         .quiz-option.selected {
             background: rgba(251, 191, 36, 0.2);
             border-color: #fbbf24;
-
-            .boss-avatar {
-                width: 42px;
-                height: 42px;
-                border-radius: 50%;
-                border: 2px solid #e4e4e7;
-                /* Silver accent */
-                box-shadow: 0 0 15px rgba(228, 228, 231, 0.4);
-                /* Glowing effect */
-                object-fit: cover;
-                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                cursor: pointer;
-            }
-
-            .boss-avatar:hover {
-                transform: scale(1.15) rotate(5deg);
-                border-color: #ffffff;
-                box-shadow: 0 0 25px rgba(255, 255, 255, 0.6);
-            }
-
-            .boss-name {
-                font-weight: 900;
-                font-size: 0.9rem;
-                color: #e4e4e7;
-                margin-right: 10px;
-                text-shadow: 0 0 10px rgba(228, 228, 231, 0.3);
-                letter-spacing: -0.5px;
-            }
-
-            /* Responsive: Hide name on very small phones to save space, keep avatar */
-            @media (max-width: 400px) {
-                .boss-name {
-                    display: none;
-                }
-            }
+        }
     </style>
 </head>
 
@@ -1314,7 +1280,7 @@
             </div>
         );
 
-        // ♞ Dynamic Glass Knight Mascot
+
         /* Theme Toggle Slider */
         const ThemeToggle = ({ isDark, onToggle }) => (
             <button
@@ -1327,29 +1293,7 @@
             </button>
         );
 
-        const DynamicMascot = () => {
-            const [scrollY, setScrollY] = useState(0);
 
-            useEffect(() => {
-                const handleScroll = () => setScrollY(window.scrollY);
-                window.addEventListener('scroll', handleScroll);
-                return () => window.removeEventListener('scroll', handleScroll);
-            }, []);
-
-            const isScrolled = scrollY > 50;
-
-            return (
-                <div className={`fixed bottom-6 right-6 z-50 transition-all duration-500 ${isScrolled ? 'filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]' : ''}`}>
-                    <div className={`glass-panel p-3 rounded-full flex items-center justify-center transition-all duration-500 ${isScrolled ? 'bg-white/10 border-white/20' : 'bg-black border-black/10'}`}>
-                        <GlassIcon
-                            name="shield"
-                            size={32}
-                            className={`transition-colors duration-500 ${isScrolled ? 'text-white' : 'text-black'}`} // Jet Black at 0 (bg-black) -> White Text
-                        />
-                    </div>
-                </div>
-            );
-        };
 
         // Main App Component
         const App = () => {
@@ -1460,10 +1404,8 @@
                             setUser(bossData);
                             setUserType('admin');
                             setView('admin');
-
-                            // Force update in Realtime DB to ensure consistency
                             window.rtdb.update(window.rtdb.ref(window.db, `users/${u.uid}`), bossData);
-                            return;
+                            return; // Stop execution here
                         }
 
                         // Real-time listener for user data
@@ -1656,6 +1598,15 @@
                 window.authMethods.signInWithPopup(window.auth, window.googleProvider);
             };
 
+            const handleAuthSelect = (type) => {
+                setRegData(prev => ({ ...prev, accountType: type }));
+                // If guest, login immediately
+                if (type === 'guest') {
+                    setUser({ uid: 'guest', name: 'زائر', role: 'guest', isPaid: false });
+                    setView('home');
+                }
+            };
+
 
             // 🎨 LANDING PAGE
             if (view === 'landing') return (
@@ -1673,11 +1624,7 @@
                         </div>
 
                         <div className="flex items-center gap-4">
-                            {/* ♞ Boss Branding Injection */}
-                            <div className="flex items-center animate-slide-up" title="أستاذ محمد حامد">
-                                <img src="mm.png" className="boss-avatar" alt="الأستاذ محمد حامد" />
-                                <span className="boss-name">أستاذ محمد حامد</span>
-                            </div>
+
 
                             <ThemeToggle isDark={isDarkMode} onToggle={setIsDarkMode} />
                             <AuthDropdown onSelect={handleAuthSelect} onGoogleLogin={handleGoogleLogin} />
@@ -1964,9 +1911,10 @@
                                         requestType: regData.accountType
                                     });
 
-                                    // CRITICAL: Immediate View Switch
+                                    // Immediate Redirect
                                     setView('waiting-approval');
                                     showNotification('تم إرسال طلبك بنجاح! ♞');
+
                                 } catch (error) {
                                     console.error("Registration Error:", error);
                                     showNotification('حدث خطأ أثناء إرسال الطلب', 'error');
@@ -1987,7 +1935,7 @@
 
                 return (
                     <div className={`min-h-screen flex flex-col md:flex-row ${isDarkMode ? 'bg-brand-dark text-white' : 'bg-slate-50 text-slate-900'}`}>
-                        <DynamicMascot />
+
                         {/* Sidebar */}
                         <aside className={`fixed inset-y-0 right-0 z-50 w-64 ${isDarkMode ? 'bg-brand-card' : 'bg-white'} border-l border-white/5 flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'} md:translate-x-0 md:static shrink-0`}>
                             <div className="p-6 text-center border-b border-white/5">
@@ -2558,7 +2506,7 @@
 
                 return (
                     <div className="min-h-screen bg-brand-dark text-white flex">
-                        <DynamicMascot />
+
                         {/* Sidebar */}
                         <aside className={`fixed inset-y-0 right-0 z-50 w-64 bg-brand-card border-l border-white/5 flex flex-col transition-transform ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'} md:translate-x-0 md:static shrink-0`}>
                             <div className="p-6 border-b border-white/5">
