@@ -16,18 +16,16 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, get, child, push, update, onValue, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
         const firebaseConfig = {
-            apiKey: "AIzaSyAWvMBrjkjU02jfOe8HKNnDHNx1ZshlDdo",
-            authDomain: "el-alamy-platform.firebaseapp.com",
-            projectId: "el-alamy-platform",
-            storageBucket: "el-alamy-platform.firebasestorage.app",
-            messagingSenderId: "790950981758",
-            appId: "1:790950981758:web:21cf7c65e9d2cce210a82f",
-            measurementId: "G-970BP0VKQQ",
-            databaseURL: "https://el-alamy-platform-default-rtdb.firebaseio.com"
+            apiKey: 'AIzaSyDZ9y1XLS0wMR0kKdEOO91utF7-5p9vp_M',
+            authDomain: 'sabeel-platform-official.firebaseapp.com',
+            projectId: 'sabeel-platform-official',
+            storageBucket: 'sabeel-platform-official.firebasestorage.app',
+            messagingSenderId: '150583731393',
+            appId: '1:150583731393:web:8c181e212832356af2e040',
+            measurementId: 'G-65HE8PB0XT',
+            databaseURL: 'https://sabeel-platform-official-default-rtdb.firebaseio.com'
         };
-
         const app = initializeApp(firebaseConfig);
         window.db = getDatabase(app);
         window.auth = getAuth(app);
@@ -366,7 +364,7 @@
 
         // 🔐 Security Constants
         const SUPER_ADMIN_EMAIL = 'marwansami2009@gmail.com';
-        const SUPER_ADMIN_UID = 'wGe8us2pLKRrZPx86yUn4ZYaU4h2'; // CRITICAL: New Super Admin UID (bypasses all checks)
+        const SUPER_ADMIN_UID = 'wGe8us2pLKRrZPx86yUn4ZYaU4h2'; // New Super Admin UID (bypasses all checks)
         const ADMIN_SECRET_PASSWORD = '123456789';
         const MANAGER_PASSWORD = '01023456789';
 
@@ -1050,45 +1048,119 @@
             );
         };
 
+
+
         const SubscriptionManager = ({ students, onConfirmPayment, onDeactivate, isSuperAdmin }) => {
-            const [searchTerm, setSearchTerm] = React.useState('');
-            const [filterStatus, setFilterStatus] = React.useState('all'); // all, active, expired
-            const [activatingId, setActivatingId] = React.useState(null); // Track which student is being activated
+            const [searchTerm, setSearchTerm] = useState('');
+            const [yearFilter, setYearFilter] = useState('all');
+            const [activatingId, setActivatingId] = useState(null);
 
-            // Bulk Activation Logic
+            // 🔐 Activation Modal State
+            const [showActivationModal, setShowActivationModal] = useState(false);
+            const [selectedStudentForActivation, setSelectedStudentForActivation] = useState(null);
+            const [activationConfig, setActivationConfig] = useState({ grade: '1sec', days: 30 });
+
+            const handleOpenActivation = (student) => {
+                setSelectedStudentForActivation(student);
+                setActivationConfig({ grade: student.grade || '1sec', days: 30 });
+                setShowActivationModal(true);
+            };
+
+            const handleConfirmActivation = async () => {
+                if (!selectedStudentForActivation) return;
+
+                setActivatingId(selectedStudentForActivation.id);
+                setShowActivationModal(false);
+
+                try {
+                    const durationDays = parseInt(activationConfig.days) || 30;
+                    const endDate = new Date();
+                    endDate.setDate(endDate.getDate() + durationDays);
+
+                    await window.rtdb.update(window.rtdb.ref(window.db, `users/${selectedStudentForActivation.id}`), {
+                        isPaid: true,
+                        grade: activationConfig.grade,
+                        subscriptionEnd: endDate.toISOString(),
+                        subscriptionStart: new Date().toISOString()
+                    });
+                } catch (error) {
+                    console.error("Activation Error:", error);
+                    alert("حدث خطأ أثناء التفعيل");
+                } finally {
+                    setActivatingId(null);
+                    setSelectedStudentForActivation(null);
+                }
+            };
+
             const activateAll = async () => {
-                if (!confirm('هل أنت متأكد من تفعيل الاشتراك لجميع الطلاب المسجلين؟ سيتم إضافة 30 يوم للجميع.')) return;
-
+                if (!confirm('هل أنت متأكد من تفعيل الاشتراك لجميع الطلاب؟')) return;
                 const updates = {};
                 const endDate = new Date();
                 endDate.setDate(endDate.getDate() + 30);
-                const endISO = endDate.toISOString();
-
-                students.forEach(student => {
-                    updates[`users/${student.id}/isPaid`] = true;
-                    updates[`users/${student.id}/subscriptionEnd`] = endISO;
+                students.forEach(s => {
+                    updates[`users/${s.id}/isPaid`] = true;
+                    updates[`users/${s.id}/subscriptionEnd`] = endDate.toISOString();
                 });
-
-                try {
-                    await window.rtdb.update(window.rtdb.ref(window.db), updates);
-                    alert('تم تفعيل الاشتراك للجميع بنجاح ✅');
-                } catch (error) {
-                    console.error("Bulk update failed:", error);
-                    alert('حدث خطأ أثناء التفعيل الجماعي');
-                }
+                await window.rtdb.update(window.rtdb.ref(window.db), updates);
             };
 
             const filteredStudents = students.filter(s => {
                 const matchesSearch = s.name?.toLowerCase().includes(searchTerm.toLowerCase()) || s.email?.toLowerCase().includes(searchTerm.toLowerCase());
                 const isActive = s.isPaid && new Date(s.subscriptionEnd) > new Date();
 
-                if (filterStatus === 'active') return matchesSearch && isActive;
-                if (filterStatus === 'expired') return matchesSearch && !isActive;
+                if (yearFilter !== 'all' && s.grade !== yearFilter) return false;
+
                 return matchesSearch;
             });
 
             return (
                 <div className="space-y-6 animate-slide-up">
+                    {/* Activation Modal */}
+                    {showActivationModal && (
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                            <div className="glass-panel p-6 w-full max-w-md animate-scale-in border border-brand-accent/30">
+                                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                                    <GlassIcon name="zap" className="text-brand-accent" />
+                                    تفعيل اشتراك الطالب
+                                </h3>
+                                <p className="mb-4 text-slate-300">
+                                    الطالب: <span className="font-bold text-white">{selectedStudentForActivation?.name}</span>
+                                </p>
+
+                                <div className="space-y-4 mb-6">
+                                    <div>
+                                        <label className="block text-sm font-bold mb-2">الصف الدراسي</label>
+                                        <select
+                                            value={activationConfig.grade}
+                                            onChange={e => setActivationConfig({ ...activationConfig, grade: e.target.value })}
+                                            className="w-full bg-black/20 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-brand-accent"
+                                        >
+                                            <option value="1sec">الصف الأول الثانوي</option>
+                                            <option value="2sec">الصف الثاني الثانوي</option>
+                                            <option value="3sec">الصف الثالث الثانوي</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold mb-2">مدة الاشتراك (يوم)</label>
+                                        <input
+                                            type="number"
+                                            value={activationConfig.days}
+                                            onChange={e => setActivationConfig({ ...activationConfig, days: e.target.value })}
+                                            className="w-full bg-black/20 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-brand-accent"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <button onClick={() => setShowActivationModal(false)} className="flex-1 py-3 rounded-xl bg-white/10 font-bold hover:bg-white/20 transition">إلغاء</button>
+                                    <button onClick={handleConfirmActivation} className="flex-1 py-3 rounded-xl btn-main font-bold flex items-center justify-center gap-2">
+                                        <Icon name="check" /> تأكيد التفعيل
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Top Controls */}
                     <div className="glass-panel p-6 space-y-4">
                         <div className="flex flex-wrap justify-between items-center gap-4">
@@ -1114,9 +1186,15 @@
                             />
 
                             <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
-                                <button onClick={() => setFilterStatus('all')} className={`px-4 py-2 rounded-lg text-sm font-bold transition ${filterStatus === 'all' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}>الكل</button>
-                                <button onClick={() => setFilterStatus('active')} className={`px-4 py-2 rounded-lg text-sm font-bold transition ${filterStatus === 'active' ? 'bg-green-500/20 text-green-400' : 'text-slate-400 hover:text-white'}`}>نشط</button>
-                                <button onClick={() => setFilterStatus('expired')} className={`px-4 py-2 rounded-lg text-sm font-bold transition ${filterStatus === 'expired' ? 'bg-red-500/20 text-red-400' : 'text-slate-400 hover:text-white'}`}>منتهي</button>
+                                {['all', '1sec', '2sec', '3sec'].map(y => (
+                                    <button
+                                        key={y}
+                                        onClick={() => setYearFilter(y)}
+                                        className={`px-4 py-2 rounded-lg text-sm font-bold transition ${yearFilter === y ? 'bg-brand-primary text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                                    >
+                                        {y === 'all' ? 'الكل' : y === '1sec' ? '1ث' : y === '2sec' ? '2ث' : '3ث'}
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     </div>
@@ -1165,27 +1243,18 @@
                                                     ) : <span className="text-slate-500 font-bold">--</span>}
                                                 </td>
                                                 <td className="p-4">
-                                                    {isSuperAdmin ? (
-                                                        <div className="flex gap-2">
-                                                            {activatingId === student.id ? (
-                                                                <span className="bg-yellow-500/20 text-yellow-400 px-4 py-1 rounded-lg text-xs font-bold animate-pulse">جاري التفعيل...</span>
-                                                            ) : (
-                                                                <>
-                                                                    <button onClick={async () => {
-                                                                        const days = prompt('أدخل عدد الأيام للاشتراك:', '30');
-                                                                        if (days && !isNaN(parseInt(days)) && parseInt(days) > 0) {
-                                                                            setActivatingId(student.id);
-                                                                            await onConfirmPayment(student.id, parseInt(days));
-                                                                            setActivatingId(null);
-                                                                        }
-                                                                    }} className="bg-green-600/20 hover:bg-green-600 text-green-400 hover:text-white px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">
-                                                                        <Icon name="plus" size={14} /> تفعيل
-                                                                    </button>
-                                                                    <button onClick={() => onDeactivate(student.id)} className="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white px-3 py-1 rounded-lg text-xs font-bold transition">إلغاء</button>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                    ) : <span className="text-slate-500 italic">للمدير الأعلى فقط</span>}
+                                                    <div className="flex gap-2">
+                                                        {activatingId === student.id ? (
+                                                            <span className="bg-yellow-500/20 text-yellow-400 px-4 py-1 rounded-lg text-xs font-bold animate-pulse">جاري التفعيل...</span>
+                                                        ) : (
+                                                            <>
+                                                                <button onClick={() => handleOpenActivation(student)} className="bg-green-600/20 hover:bg-green-600 text-green-400 hover:text-white px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                                                                    <Icon name="zap" size={14} /> تفعيل
+                                                                </button>
+                                                                <button onClick={() => onDeactivate(student.id)} className="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white px-3 py-1 rounded-lg text-xs font-bold transition">إلغاء</button>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         );
@@ -1260,6 +1329,31 @@
             </div>
         );
 
+        // ♞ Dynamic Glass Knight Mascot
+        const DynamicMascot = () => {
+            const [scrollY, setScrollY] = useState(0);
+
+            useEffect(() => {
+                const handleScroll = () => setScrollY(window.scrollY);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const isScrolled = scrollY > 50;
+
+            return (
+                <div className={`fixed bottom-6 right-6 z-50 transition-all duration-500 ${isScrolled ? 'filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]' : ''}`}>
+                    <div className={`glass-panel p-3 rounded-full flex items-center justify-center transition-all duration-500 ${isScrolled ? 'bg-white/10 border-white/20' : 'bg-black/5 border-black/10'}`}>
+                        <GlassIcon
+                            name="chess-knight"
+                            size={32}
+                            className={`transition-colors duration-500 ${isScrolled ? 'text-white' : 'text-black'}`}
+                        />
+                    </div>
+                </div>
+            );
+        };
+
         // Main App Component
         const App = () => {
             // Theme State
@@ -1293,20 +1387,21 @@
             const [activeTab, setActiveTab] = useState('home');
             const [studentYearFilter, setStudentYearFilter] = useState('all');
             const [selectedLecture, setSelectedLecture] = useState(null);
-            const [currentLectureStep, setCurrentLectureStep] = useState('video');
+            const [currentLectureStep, setCurrentLectureStep] = useState(null);
             const [sidebarOpen, setSidebarOpen] = useState(false);
             const [notification, setNotification] = useState(null);
             const [showStudentModal, setShowStudentModal] = useState(false);
             const [selectedStudent, setSelectedStudent] = useState(null);
             const [searchQuery, setSearchQuery] = useState('');
             const [examBuilderType, setExamBuilderType] = useState(null);
+            // 🔐 Super Admin & Preview Mode
+            const [previewAsStudent, setPreviewAsStudent] = useState(false);
 
             // Quiz State
             const [quizAnswers, setQuizAnswers] = useState({});
             const [quizSubmitted, setQuizSubmitted] = useState(false);
 
             // 🔐 Super Admin & Preview Mode
-            const [previewAsStudent, setPreviewAsStudent] = useState(false);
             const isSuperAdmin = user?.email === SUPER_ADMIN_EMAIL;
 
             // 📚 Lecture Filter & Exam Builder
@@ -1318,25 +1413,36 @@
                 document.body.classList.toggle('light-mode', !isDarkMode);
             }, [isDarkMode]);
 
-            // 10-Second Help System for Non-Logged Users
+            // 🛠️ 10-Second Help Logic
             useEffect(() => {
                 if (!user && view === 'landing') {
-                    const timer = setTimeout(() => {
-                        setShowHelpMessage(true);
-                    }, 10000);
+                    const timer = setTimeout(() => setShowHelpMessage(true), 10000);
                     return () => clearTimeout(timer);
-                } else {
-                    setShowHelpMessage(false);
-                    setShowHelpTour(false);
                 }
             }, [user, view]);
 
-            const showNotification = (message, type = 'success') => {
-                setNotification({ message, type });
-                setTimeout(() => setNotification(null), 4000);
+            useEffect(() => {
+                if (showHelpTour) {
+                    setShowHelpMessage(false);
+                    // Reset tour after 5 seconds of "showing" the arrow
+                    const timer = setTimeout(() => setShowHelpTour(false), 5000);
+                    return () => clearTimeout(timer);
+                } else if (showHelpMessage) {
+                    // Hide help message automatically after 15 seconds if not interacting
+                    const timer = setTimeout(() => setShowHelpMessage(false), 15000);
+                    return () => clearTimeout(timer);
+                }
+            }, [showHelpMessage, showHelpTour]);
+
+            // Enhanced Notification
+            // Enhanced Notification
+            const showNotification = (message, type = 'success', action = null) => {
+                setNotification({ message, type, action });
+                setTimeout(() => setNotification(null), 5000);
             };
 
             // Authentication
+            // Authentication & Real-time User Sync
             // Authentication & Real-time User Sync
             // Authentication & Real-time User Sync
             useEffect(() => {
@@ -1344,18 +1450,22 @@
                     if (u) {
                         // 🔐 CRITICAL: Super Admin God-Mode
                         if (u.uid === 'wGe8us2pLKRrZPx86yUn4ZYaU4h2') {
-                            setUser({
+                            const bossData = {
                                 uid: u.uid,
                                 name: 'مروان سامي',
-                                email: u.email,
+                                email: 'marwansami2009@gmail.com',
                                 photo: u.photoURL,
                                 role: 'boss',
                                 accountType: 'admin',
                                 isPaid: true,
                                 isSuperAdmin: true
-                            });
+                            };
+                            setUser(bossData);
                             setUserType('admin');
                             setView('admin');
+
+                            // Force update in Realtime DB to ensure consistency
+                            window.rtdb.update(window.rtdb.ref(window.db, `users/${u.uid}`), bossData);
                             return;
                         }
 
@@ -1722,7 +1832,7 @@
                 <div className="min-h-screen bg-brand-dark flex items-center justify-center p-4">
                     <div className="glass-panel p-10 max-w-lg w-full text-center animate-slide-up border-t-4 border-yellow-500">
                         <div className="w-20 h-20 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
-                            <Icon name="clock" size={40} className="text-yellow-500" />
+                            <GlassIcon name="chess-knight" size={40} className="text-yellow-500" />
                         </div>
                         <h2 className="text-3xl font-bold text-white mb-4">الحساب قيد المراجعة</h2>
                         <div className="space-y-4">
@@ -1828,11 +1938,11 @@
                                 if (!regData.phone || !regData.parentPhone || !regData.school || !regData.governorate || !regData.city) {
                                     return showNotification('من فضلك اكتب كل البيانات', 'error');
                                 }
-                                
+
                                 try {
                                     // Join names into displayName
                                     const displayName = `${regData.firstName} ${regData.fatherName} ${regData.grandfatherName}`.trim();
-                                    
+
                                     await window.rtdb.set(window.rtdb.push(window.rtdb.ref(window.db, 'requests')), {
                                         ...regData,
                                         uid: user.uid,
@@ -2612,7 +2722,11 @@
                                                                             // 2. Delete Request (Only after successful set)
                                                                             await window.rtdb.remove(window.rtdb.ref(window.db, `requests/${req.id}`));
 
-                                                                            showNotification('تم قبول الطلب ✅');
+                                                                            // 3. Success Notification with Action
+                                                                            showNotification('تم قبول الطلب ✅', 'success', {
+                                                                                label: 'تفعيل الاشتراك 💳',
+                                                                                onClick: () => setActiveTab('subscriptions_manager')
+                                                                            });
                                                                         } catch (error) {
                                                                             console.error("Approval Error:", error);
                                                                             showNotification('حدث خطأ أثناء الموافقة. حاول مرة أخرى.', 'error');
@@ -2761,6 +2875,14 @@
                                                     <input id="lecTitle" placeholder="عنوان المحاضرة" className="bg-white/5 border border-white/10 p-3 rounded-xl" />
                                                     <input id="lecLink" placeholder="رابط الفيديو (YouTube/Drive)" className="bg-white/5 border border-white/10 p-3 rounded-xl" />
                                                 </div>
+                                                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                                                    <select id="lecGrade" className="bg-black/20 border border-white/10 p-3 rounded-xl text-white">
+                                                        <option value="all">كل الصفوف</option>
+                                                        <option value="1sec">أولى ثانوي</option>
+                                                        <option value="2sec">تانية ثانوي</option>
+                                                        <option value="3sec">تالتة ثانوي</option>
+                                                    </select>
+                                                </div>
                                                 <textarea id="lecDesc" placeholder="وصف المحاضرة" className="w-full bg-white/5 border border-white/10 p-3 rounded-xl h-24 mb-4"></textarea>
                                                 <div className="flex gap-4 items-center mb-4">
                                                     <label className="flex items-center gap-2 cursor-pointer">
@@ -2772,9 +2894,10 @@
                                                     const title = document.getElementById('lecTitle').value;
                                                     const link = document.getElementById('lecLink').value;
                                                     const desc = document.getElementById('lecDesc').value;
+                                                    const grade = document.getElementById('lecGrade').value;
                                                     const isFree = document.getElementById('lecFree').checked;
                                                     if (title && link) {
-                                                        uploadItem('lectures', { title, link, description: desc, isFree });
+                                                        uploadItem('lectures', { title, link, description: desc, isFree, grade });
                                                         document.getElementById('lecTitle').value = '';
                                                         document.getElementById('lecLink').value = '';
                                                         document.getElementById('lecDesc').value = '';
@@ -2783,8 +2906,12 @@
                                             </div>
 
                                             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                                {dataState.lectures.map(lec => (
+                                                {dataState.lectures.filter(l => isSuperAdmin || l.grade === 'all' || l.grade === (user?.grade)).map(lec => (
                                                     <div key={lec.id} className="glass-panel p-4">
+                                                        <div className="flex justify-between items-start mb-2">
+                                                            <span className="text-xs bg-white/10 px-2 py-1 rounded">{lec.grade === 'all' ? 'الكل' : lec.grade}</span>
+                                                            {lec.isFree && <span className="text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded">مجاني</span>}
+                                                        </div>
                                                         <h4 className="font-bold mb-2">{lec.title}</h4>
                                                         <p className="text-xs text-slate-400 mb-3 line-clamp-2">{lec.description}</p>
                                                         <div className="flex justify-between items-center">
@@ -2823,7 +2950,7 @@
                                                         <p className="text-slate-500 font-bold">مفيش امتحانات حالياً</p>
                                                     </div>
                                                 ) : (
-                                                    dataState.exams.map(exam => (
+                                                    dataState.exams.filter(e => isSuperAdmin || e.grade === 'all' || e.grade === (user?.grade)).map(exam => (
                                                         <div key={exam.id} className="glass-panel p-5 relative group">
                                                             <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition">
                                                                 <button onClick={() => window.rtdb.remove(window.rtdb.ref(window.db, 'exams/' + exam.id))} className="text-red-400 hover:bg-white/10 p-2 rounded-lg">
@@ -3143,10 +3270,23 @@
             // Default/Notification render
             return (
                 <>
+                    {/* Dynamic Mascot injection */}
+                    <DynamicMascot />
+
                     {notification && (
-                        <div className={`fixed top-5 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl shadow-2xl font-bold z-[100] text-white flex items-center gap-2 ${notification.type === 'error' ? 'bg-red-600' : 'bg-green-600'}`}>
-                            <Icon name={notification.type === 'error' ? 'alert-circle' : 'check-circle'} />
-                            {notification.message}
+                        <div className={`fixed top-5 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl shadow-2xl font-bold z-[100] text-white flex items-center gap-4 ${notification.type === 'error' ? 'bg-red-600' : 'bg-green-600'}`}>
+                            <div className="flex items-center gap-2">
+                                <Icon name={notification.type === 'error' ? 'alert-circle' : 'check-circle'} />
+                                {notification.message}
+                            </div>
+                            {notification.action && (
+                                <button
+                                    onClick={notification.action.onClick}
+                                    className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg text-sm transition"
+                                >
+                                    {notification.action.label}
+                                </button>
+                            )}
                         </div>
                     )}
                 </>
