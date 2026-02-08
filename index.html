@@ -1613,65 +1613,73 @@
                 <div className={`min-h-screen text-white relative overflow-hidden math-grid flex flex-col ${isDarkMode ? 'bg-brand-dark' : 'bg-slate-50 text-slate-900'}`}>
                     <div className="absolute top-0 left-0 w-full h-full hero-glow z-0"></div>
 
-                    <header className="absolute top-0 left-0 right-0 z-50 p-6 flex justify-between items-center">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/20 shadow-xl">
-                                <span className="text-2xl">♞</span>
+
+                    <header className="absolute top-0 left-0 right-0 z-50 p-4 md:p-6">
+                        <div className="flex justify-between items-center gap-4">
+                            {/* Logo and Title */}
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 md:w-12 md:h-12 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/20 shadow-xl shrink-0">
+                                    <span className="text-xl md:text-2xl">♞</span>
+                                </div>
+                                <h1 className="text-lg md:text-2xl font-black text-white tracking-tight drop-shadow-lg line-clamp-1">
+                                    {PLATFORM_NAME}
+                                </h1>
                             </div>
-                            <h1 className="text-2xl font-black text-white tracking-tighter drop-shadow-lg hidden md:block">
-                                {PLATFORM_NAME}
-                            </h1>
-                        </div>
 
-                        <div className="flex items-center gap-4">
-
-
-                            <ThemeToggle isDark={isDarkMode} onToggle={setIsDarkMode} />
-                            <AuthDropdown onSelect={handleAuthSelect} onGoogleLogin={handleGoogleLogin} />
+                            {/* Actions */}
+                            <div className="flex items-center gap-2 md:gap-4 shrink-0">
+                                <ThemeToggle isDark={isDarkMode} onToggle={setIsDarkMode} />
+                                <AuthDropdown onSelect={handleAuthSelect} onGoogleLogin={handleGoogleLogin} />
+                            </div>
                         </div>
                     </header>
 
-                    <div className="flex-1 container mx-auto px-4 flex flex-col-reverse md:flex-row items-center justify-center gap-10 relative z-20 py-10">
-                        <div className="text-center md:text-right space-y-6 md:w-1/2 animate-slide-up">
-                            <div className={`inline-block px-4 py-1 rounded-full text-sm font-bold border ${isDarkMode ? 'bg-zinc-500/20 text-zinc-300 border-zinc-500/30' : 'bg-zinc-100 text-zinc-700 border-zinc-300'}`}>
+
+
+                    <div className="flex-1 container mx-auto px-4 md:px-6 lg:px-8 flex flex-col-reverse md:flex-row items-center justify-center gap-6 md:gap-10 relative z-20 pt-24 pb-10 md:pt-32 md:pb-16">
+                        <div className="text-center md:text-right space-y-4 md:space-y-6 md:w-1/2 animate-slide-up max-w-2xl">
+                            <div className={`inline-block px-3 py-1 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-bold border ${isDarkMode ? 'bg-zinc-500/20 text-zinc-300 border-zinc-500/30' : 'bg-zinc-100 text-zinc-700 border-zinc-300'}`}>
                                 📚 أقوى منصة لغة عربية في مصر
                             </div>
 
-                            <h1 className="text-5xl md:text-7xl font-black leading-tight">
+                            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-tight">
                                 اللغة العربية<br />
                                 <span className="text-brand-accent">سبيل التفوق!</span>
                             </h1>
 
-                            <p className={`text-lg md:text-xl font-medium max-w-lg mx-auto md:mx-0 ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                            <p className={`text-base sm:text-lg md:text-xl font-medium max-w-lg mx-auto md:mx-0 leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                                 مع {TEACHER_NAME}.. النحو والبلاغة والأدب بقوا أسهل مما تتخيل.
                             </p>
 
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start pt-4">
-                                <button onClick={handleGoogleLogin} className="btn-main px-8 py-4 rounded-xl text-xl flex items-center justify-center gap-2">
+                            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center md:justify-start pt-2 md:pt-4">
+                                <button onClick={handleGoogleLogin} className="btn-main px-6 py-3 md:px-8 md:py-4 rounded-xl text-base md:text-xl flex items-center justify-center gap-2 w-full sm:w-auto">
                                     اشترك الآن <GlassIcon name="book-open" size={20} />
                                 </button>
                             </div>
                         </div>
 
-                        <div className={`md:w-1/2 relative flex justify-center items-end ${isDarkMode ? '' : 'bg-gradient-to-b from-white to-zinc-50 rounded-3xl p-8'}`}>
+                        <div className={`md:w-1/2 relative flex justify-center items-end w-full ${isDarkMode ? '' : 'bg-gradient-to-b from-white to-zinc-50 rounded-3xl p-4 md:p-8'}`}>
                             <div className="absolute inset-0 bg-brand-primary/30 blur-[100px] rounded-full"></div>
-                            <img src="./teacher.png" className="relative z-10 w-full max-w-md object-contain drop-shadow-2xl animate-float hover:scale-105 transition-transform duration-500" alt={TEACHER_NAME} onError={(e) => { e.target.style.display = 'none' }} />
+                            <img src="./teacher.png" className="relative z-10 w-full max-w-xs md:max-w-md object-contain drop-shadow-2xl animate-float hover:scale-105 transition-transform duration-500" alt={TEACHER_NAME} onError={(e) => { e.target.style.display = 'none' }} />
                         </div>
                     </div>
 
-                    <section className={`py-20 relative z-20 ${isDarkMode ? 'bg-black/20' : 'bg-white/80'} backdrop-blur-sm`}>
-                        <div className="container mx-auto px-4">
-                            <h2 className="text-4xl font-black text-center mb-16">ليه <span className="text-brand-accent">سبيل التفوق </span> يكتسح؟ 🤔</h2>
-                            <div className="grid md:grid-cols-3 gap-8">
+
+                    <section className={`py-12 md:py-16 lg:py-20 relative z-20 ${isDarkMode ? 'bg-black/20' : 'bg-white/80'} backdrop-blur-sm`}>
+                        <div className="container mx-auto px-4 md:px-6 lg:px-8">
+                            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-center mb-8 md:mb-12 lg:mb-16">
+                                ليه <span className="text-brand-accent">سبيل التفوق </span> يكتسح؟ 🤔
+                            </h2>
+                            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
                                 {[
                                     { icon: 'brain', title: 'شرح يدخل المخ', desc: 'بنبسطلك المعلومة المعقدة ونخليها ميه.' },
                                     { icon: 'target', title: 'حل كتير جداً', desc: 'بنحل معاك من كل المصادر.' },
                                     { icon: 'message-circle', title: 'متابعة 24 ساعة', desc: 'اسأل في أي وقت هتلاقي اللي يرد.' }
                                 ].map((feature, idx) => (
-                                    <div key={idx} className="glass-panel p-8 text-center hover:-translate-y-2 transition-transform duration-300">
+                                    <div key={idx} className="glass-panel p-6 md:p-8 text-center hover:-translate-y-2 transition-transform duration-300">
                                         <GlassIcon name={feature.icon} size={32} className="mx-auto mb-4" />
-                                        <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                                        <p className={isDarkMode ? 'text-slate-400' : 'text-slate-600'}>{feature.desc}</p>
+                                        <h3 className="text-lg md:text-xl font-bold mb-2">{feature.title}</h3>
+                                        <p className={`text-sm md:text-base ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>{feature.desc}</p>
                                     </div>
                                 ))}
                             </div>
@@ -1785,22 +1793,43 @@
             // ⏳ WAITING APPROVAL VIEW
             if (view === 'waiting-approval') return (
                 <div className="min-h-screen bg-brand-dark flex items-center justify-center p-4">
-                    <div className="glass-panel p-10 max-w-lg w-full text-center animate-slide-up border-t-4 border-yellow-500">
-                        <div className="w-20 h-20 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
-                            <GlassIcon name="chess-knight" size={40} className="text-yellow-500" />
+                    <div className="glass-panel p-6 md:p-10 max-w-lg w-full text-center animate-slide-up border-t-4 border-yellow-500 space-y-6">
+                        <div className="w-16 h-16 md:w-20 md:h-20 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto animate-pulse">
+                            <span className="text-4xl md:text-5xl">♞</span>
                         </div>
-                        <h2 className="text-3xl font-bold text-white mb-4">الحساب قيد المراجعة</h2>
-                        <div className="space-y-4">
-                            <p className="text-slate-300 leading-relaxed text-lg">
-                                ♞ تم استلام بياناتك بنجاح! حسابك الآن قيد المراجعة من قبل الإدارة. سيتم تفعيل حسابك خلال ساعات قليلة، يرجى المحاولة لاحقاً.
+                        
+                        <h2 className="text-2xl md:text-3xl font-black text-white">الحساب قيد المراجعة ⏳</h2>
+                        
+                        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 md:p-6">
+                            <p className="text-slate-200 leading-relaxed text-base md:text-lg font-bold">
+                                ♞ تم استلام بياناتك بنجاح!
                             </p>
-                            <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-                                <p className="text-sm text-slate-400">سيتم تفعيل حسابك تلقائياً دون الحاجة لإعادة التسجيل.</p>
-                            </div>
-                            <button onClick={() => window.location.reload()} className="text-brand-accent hover:underline text-sm font-bold">
+                            <p className="text-slate-300 leading-relaxed text-sm md:text-base mt-2">
+                                حسابك الآن قيد المراجعة من قبل الإدارة. 
+                                <br />
+                                سيتم تفعيل حسابك خلال <span className="text-yellow-400 font-bold">ساعات قليلة</span>.
+                            </p>
+                        </div>
+                        
+                        <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                            <p className="text-sm text-slate-400">
+                                💡 سيتم تفعيل حسابك تلقائياً دون الحاجة لإعادة التسجيل.
+                            </p>
+                        </div>
+                        
+                        <div className="flex flex-col gap-3">
+                            <button 
+                                onClick={() => window.location.reload()} 
+                                className="bg-brand-accent/20 hover:bg-brand-accent/30 text-brand-accent px-6 py-3 rounded-xl font-bold transition flex items-center justify-center gap-2"
+                            >
+                                <GlassIcon name="refresh-cw" size={18} />
                                 اضغط هنا للتحديث
                             </button>
-                            <button onClick={() => window.authMethods.signOut(window.auth)} className="block w-full text-red-400 hover:bg-red-500/10 p-3 rounded-xl transition mt-4">
+                            <button 
+                                onClick={() => window.authMethods.signOut(window.auth)} 
+                                className="bg-red-500/10 hover:bg-red-500/20 text-red-400 px-6 py-3 rounded-xl font-bold transition flex items-center justify-center gap-2"
+                            >
+                                <GlassIcon name="log-out" size={18} />
                                 تسجيل خروج
                             </button>
                         </div>
@@ -1911,9 +1940,13 @@
                                         requestType: regData.accountType
                                     });
 
-                                    // Immediate Redirect
+                                    // إظهار رسالة النجاح
+                                    console.log('✅ تم حفظ الطلب بنجاح!');
+                                    showNotification('تم إرسال طلبك بنجاح! ♞ انتظر مراجعة الإدارة');
+                                    
+                                    // الانتقال الفوري لصفحة الانتظار
+                                    console.log('🔄 التوجيه إلى صفحة الانتظار...');
                                     setView('waiting-approval');
-                                    showNotification('تم إرسال طلبك بنجاح! ♞');
 
                                 } catch (error) {
                                     console.error("Registration Error:", error);
