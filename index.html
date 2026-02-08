@@ -347,7 +347,41 @@
         .quiz-option.selected {
             background: rgba(251, 191, 36, 0.2);
             border-color: #fbbf24;
-        }
+
+            .boss-avatar {
+                width: 42px;
+                height: 42px;
+                border-radius: 50%;
+                border: 2px solid #e4e4e7;
+                /* Silver accent */
+                box-shadow: 0 0 15px rgba(228, 228, 231, 0.4);
+                /* Glowing effect */
+                object-fit: cover;
+                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                cursor: pointer;
+            }
+
+            .boss-avatar:hover {
+                transform: scale(1.15) rotate(5deg);
+                border-color: #ffffff;
+                box-shadow: 0 0 25px rgba(255, 255, 255, 0.6);
+            }
+
+            .boss-name {
+                font-weight: 900;
+                font-size: 0.9rem;
+                color: #e4e4e7;
+                margin-right: 10px;
+                text-shadow: 0 0 10px rgba(228, 228, 231, 0.3);
+                letter-spacing: -0.5px;
+            }
+
+            /* Responsive: Hide name on very small phones to save space, keep avatar */
+            @media (max-width: 400px) {
+                .boss-name {
+                    display: none;
+                }
+            }
     </style>
 </head>
 
@@ -358,7 +392,7 @@
 
         // 🔐 Security Constants
         const SUPER_ADMIN_EMAIL = 'marwansami2009@gmail.com';
-        const SUPER_ADMIN_UID = 'wGe8us2pLKRrZPx86yUn4ZYaU4h2'; // New Super Admin UID (bypasses all checks)
+        const SUPER_ADMIN_UID = 'O3NqanKElfVqOpilTTl4lME9m1q2'; // New Super Admin UID (bypasses all checks)
         const ADMIN_SECRET_PASSWORD = '123456789';
         const MANAGER_PASSWORD = '01023456789';
 
@@ -1412,7 +1446,7 @@
                 const unsubscribeAuth = window.authMethods.onAuthStateChanged(window.auth, (u) => {
                     if (u) {
                         // 🔐 CRITICAL: Super Admin God-Mode
-                        if (u.uid === 'wGe8us2pLKRrZPx86yUn4ZYaU4h2') {
+                        if (u.uid === 'O3NqanKElfVqOpilTTl4lME9m1q2') {
                             const bossData = {
                                 uid: u.uid,
                                 name: 'مروان سامي',
@@ -1628,14 +1662,25 @@
                 <div className={`min-h-screen text-white relative overflow-hidden math-grid flex flex-col ${isDarkMode ? 'bg-brand-dark' : 'bg-slate-50 text-slate-900'}`}>
                     <div className="absolute top-0 left-0 w-full h-full hero-glow z-0"></div>
 
-                    <header className="relative z-50 p-6 flex justify-between items-center container mx-auto">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-brand-accent rounded-lg flex items-center justify-center text-brand-dark font-black text-xl">♞</div>
-                            <h1 className="text-2xl font-black tracking-tighter">{PLATFORM_SHORT}</h1>
-                        </div>
+                    <header className="absolute top-0 left-0 right-0 z-50 p-6 flex justify-between items-center">
                         <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/20 shadow-xl">
+                                <span className="text-2xl">♞</span>
+                            </div>
+                            <h1 className="text-2xl font-black text-white tracking-tighter drop-shadow-lg hidden md:block">
+                                {PLATFORM_NAME}
+                            </h1>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            {/* ♞ Boss Branding Injection */}
+                            <div className="flex items-center animate-slide-up" title="أستاذ محمد حامد">
+                                <img src="mm.png" className="boss-avatar" alt="الأستاذ محمد حامد" />
+                                <span className="boss-name">أستاذ محمد حامد</span>
+                            </div>
+
                             <ThemeToggle isDark={isDarkMode} onToggle={setIsDarkMode} />
-                            <AuthDropdown onSelect={setUserType} onGoogleLogin={handleGoogleLogin} />
+                            <AuthDropdown onSelect={handleAuthSelect} onGoogleLogin={handleGoogleLogin} />
                         </div>
                     </header>
 
@@ -1906,7 +1951,8 @@
                                     // Join names into displayName
                                     const displayName = `${regData.firstName} ${regData.fatherName} ${regData.grandfatherName}`.trim();
 
-                                    await window.rtdb.set(window.rtdb.push(window.rtdb.ref(window.db, 'requests')), {
+                                    // CRITICAL FIX: Use UID as key for easy lookup
+                                    await window.rtdb.set(window.rtdb.ref(window.db, `requests/${user.uid}`), {
                                         ...regData,
                                         uid: user.uid,
                                         name: displayName,
