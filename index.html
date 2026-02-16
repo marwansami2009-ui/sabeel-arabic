@@ -385,23 +385,6 @@
             </div>
         );
 
-        // 🔐 Auth Dropdown Component
-        const AuthDropdown = ({ onSelect, onGoogleLogin, onPhoneLogin }) => {
-            const [isOpen, setIsOpen] = useState(false);
-            return (
-                <div className="auth-dropdown" onMouseEnter={() => setIsOpen(true)} onMouseLeave={() => setIsOpen(false)}>
-                    <button className="bg-white/10 hover:bg-white/20 border border-white/20 px-6 py-2 rounded-full font-bold transition">
-                        تسجيل / دخول
-                    </button>
-                    <div className={`auth-menu ${isOpen ? 'opacity-100 visible translate-y-0' : ''}`}>
-                        <button onClick={() => { onSelect('student'); onGoogleLogin(); }}>👨‍🎓 طالب (جوجل)</button>
-                        <button onClick={() => { onSelect('student'); onPhoneLogin(); }}>📱 طالب (هاتف)</button>
-                        <button onClick={() => { onSelect('parent'); onGoogleLogin(); }}>👨‍👩‍👦 ولي أمر (جوجل)</button>
-                    </div>
-                </div>
-            );
-        };
-
         // ✅ Phone Login Component
         const PhoneLoginModal = ({ onClose, onLoginSuccess }) => {
             const [phoneNumber, setPhoneNumber] = useState('');
@@ -465,7 +448,7 @@
                                     type="tel"
                                     placeholder="رقم الهاتف (مثال: 01001234567)"
                                     value={phoneNumber}
-                                    onChange={(e) => setPhoneNumber(e.target.value)}
+                                    onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))}
                                     className="w-full p-4 bg-white/5 border border-white/10 rounded-xl mb-4 outline-none text-center"
                                 />
                                 {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
@@ -486,7 +469,7 @@
                                     type="text"
                                     placeholder="أدخل الرمز المكون من 6 أرقام"
                                     value={otp}
-                                    onChange={(e) => setOtp(e.target.value)}
+                                    onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
                                     className="w-full p-4 bg-white/5 border border-white/10 rounded-xl mb-4 outline-none text-center tracking-widest"
                                 />
                                 {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
@@ -504,6 +487,58 @@
                         <button onClick={onClose} className="mt-4 w-full py-3 bg-white/10 rounded-xl font-bold text-sm">
                             إلغاء
                         </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // ✅ New Auth Modal Component
+        const AuthModal = ({ isOpen, onClose, onGoogleLogin, onPhoneLogin }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[200] flex items-center justify-center p-4" onClick={onClose}>
+                    <div className="glass-panel p-8 w-full max-w-md relative animate-slide-up border border-white/10" onClick={e => e.stopPropagation()}>
+                        <button onClick={onClose} className="absolute top-4 left-4 p-2 hover:bg-white/10 rounded-full transition">
+                            <Icon name="x" size={24} />
+                        </button>
+
+                        <div className="text-center mb-8">
+                            <div className="w-16 h-16 bg-brand-accent/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-brand-accent/30">
+                                <span className="text-4xl">♞</span>
+                            </div>
+                            <h2 className="text-2xl font-bold mb-2">أهلاً بك في سبيل التفوق</h2>
+                            <p className="text-slate-400 text-sm">سجل دخولك الآن وابدأ رحلة التعلم</p>
+                        </div>
+
+                        <div className="space-y-4">
+                            {/* Google Login Button */}
+                            <button onClick={onGoogleLogin} className="w-full bg-white text-black p-4 rounded-xl font-bold flex items-center justify-center gap-3 hover:scale-[1.02] transition shadow-lg">
+                                <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6" alt="Google" />
+                                تسجيل الدخول باستخدام Google
+                            </button>
+
+                            {/* Facebook Login Button */}
+                            <button onClick={() => alert('قريباً.. الميزة تحت التطوير')} className="w-full bg-[#1877F2] text-white p-4 rounded-xl font-bold flex items-center justify-center gap-3 hover:scale-[1.02] transition shadow-lg opacity-80">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" className="w-6 h-6" alt="Facebook" />
+                                تسجيل الدخول باستخدام Facebook
+                            </button>
+
+                            <div className="relative my-6 text-center">
+                                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div>
+                                <span className="relative bg-[#171717] px-4 text-xs text-slate-500">أو باستخدام الهاتف</span>
+                            </div>
+
+                            {/* Phone Login Button */}
+                            <button onClick={onPhoneLogin}
+                                className="w-full bg-white/5 border border-white/10 text-white p-4 rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-white/10 transition">
+                                <Icon name="smartphone" size={20} className="text-brand-accent" />
+                                الدخول برقم الهاتف
+                            </button>
+                        </div>
+
+                        <p className="text-center text-xs text-slate-500 mt-6">
+                            بمجرد تسجيل الدخول، أنت توافق على شروط الاستخدام وسياسة الخصوصية الخاصة بالمنصة.
+                        </p>
                     </div>
                 </div>
             );
@@ -1644,6 +1679,8 @@
             const isSuperAdmin = user?.email === SUPER_ADMIN_EMAIL;
             const [lectureGradeFilter, setLectureGradeFilter] = useState('all');
             const [showExamBuilder, setShowExamBuilder] = useState(false);
+            // ✅ New State for Login Modal
+            const [showLoginModal, setShowLoginModal] = useState(false);
 
             useEffect(() => {
                 document.body.classList.toggle('light-mode', !isDarkMode);
@@ -1867,10 +1904,12 @@
             const generatePaymentCode = () => `SABEEL${Date.now().toString().slice(-8)}`;
 
             const handleGoogleLogin = () => {
+                setShowLoginModal(false);
                 window.authMethods.signInWithPopup(window.auth, window.googleProvider);
             };
 
             const handlePhoneLogin = () => {
+                setShowLoginModal(false);
                 setShowPhoneLogin(true);
             };
 
@@ -1895,43 +1934,64 @@
 
             // ✅ Enhanced registration function with better error handling
             const handleStudentRegistration = async () => {
+                // 1. التحقق من صحة الاسم (يجب أن يكون ثلاثياً على الأقل)
                 if (!regData.firstName || !regData.fatherName || !regData.grandfatherName) {
-                    showNotification('من فضلك اكتب الاسم الثلاثي كاملاً', 'error');
+                    showNotification('⚠️ يجب كتابة الاسم الثلاثي بالكامل (حروف فقط)', 'error');
                     return;
                 }
+
+                // 2. التحقق من الوصف (Bio)
                 if (!regData.bio || regData.bio.length < 10) {
-                    showNotification('من فضلك اكتب وصف مختصر عن نفسك (على الأقل 10 حروف)', 'error');
+                    showNotification('⚠️ اكتب نبذة مختصرة عن نفسك (10 حروف على الأقل)', 'error');
                     return;
                 }
-                if (!regData.phone || !regData.parentPhone || !regData.school || !regData.governorate || !regData.city) {
-                    showNotification('من فضلك اكتب كل البيانات', 'error');
+
+                // 3. التحقق من أرقام الهواتف (يجب أن تكون 11 رقم)
+                if (regData.phone.length !== 11 || regData.parentPhone.length !== 11) {
+                    showNotification('⚠️ رقم الهاتف يجب أن يكون 11 رقم صحيح', 'error');
+                    return;
+                }
+
+                // 4. التأكد من تعبئة باقي البيانات
+                if (!regData.school || !regData.governorate || !regData.city) {
+                    showNotification('⚠️ من فضلك أكمل جميع بيانات العنوان والمدرسة', 'error');
                     return;
                 }
 
                 try {
+                    // التحقق مما إذا كان المستخدم مسجلاً من قبل في قاعدة البيانات
+                    const userCheck = await window.rtdb.get(window.rtdb.ref(window.db, `users/${user.uid}`));
+                    if (userCheck.exists()) {
+                        showNotification('⛔ هذا الحساب مسجل بالفعل! لا يمكن التسجيل مرة أخرى.', 'error');
+                        window.location.reload(); // إعادة تحميل لمنع التلاعب
+                        return;
+                    }
+
                     const displayName = `${regData.firstName} ${regData.fatherName} ${regData.grandfatherName}`.trim();
 
-                    console.log("📤 جاري إرسال البيانات...", { uid: user.uid, displayName });
+                    console.log("📤 جاري إرسال البيانات للأدمن...", { uid: user.uid, displayName });
 
+                    // إرسال طلب الالتحاق (Requests) ليراه الأدمن
                     await window.rtdb.set(window.rtdb.ref(window.db, `requests/${user.uid}`), {
                         ...regData,
                         uid: user.uid,
-                        name: displayName,
+                        name: displayName, // الاسم الكامل المجمع
                         displayName: displayName,
-                        email: user.email,
-                        photo: user.photo,
-                        date: new Date().toLocaleDateString(),
+                        email: user.email || 'Phone Login',
+                        photo: user.photo || 'https://via.placeholder.com/150', // صورة افتراضية لو مفيش
+                        date: new Date().toLocaleDateString('ar-EG'),
                         ts: Date.now(),
-                        requestType: regData.accountType
+                        requestType: regData.accountType,
+                        status: 'pending' // حالة الطلب
                     });
 
-                    console.log('✅ تم حفظ الطلب بنجاح!');
-                    showNotification('تم إرسال طلبك بنجاح! ♞ انتظر مراجعة الإدارة');
+                    console.log('✅ تم إرسال الطلب بنجاح!');
+                    showNotification('تم إرسال طلبك بنجاح! ♞ انتظر موافقة الإدارة وسيتم تفعيل حسابك.', 'success');
                     setView('waiting-approval');
 
                 } catch (error) {
-                    console.error("❌ Registration Error:", error);
-                    showNotification('حدث خطأ أثناء إرسال الطلب: ' + error.message, 'error');
+                    console.error("❌ خطأ في التسجيل:", error);
+                    showNotification('حدث خطأ أثناء الإرسال: ' + error.message, 'error');
                 }
             };
 
@@ -1953,10 +2013,24 @@
 
                             <div className="flex items-center gap-2 md:gap-4 shrink-0">
                                 <ThemeToggle isDark={isDarkMode} onToggle={setIsDarkMode} />
-                                <AuthDropdown onSelect={handleAuthSelect} onGoogleLogin={handleGoogleLogin} onPhoneLogin={handlePhoneLogin} />
+                                {/* ✅ Updated Button to open Modal */}
+                                <button 
+                                    onClick={() => setShowLoginModal(true)} 
+                                    className="bg-white text-black hover:bg-slate-200 px-6 py-2 rounded-full font-bold transition flex items-center gap-2 shadow-lg"
+                                >
+                                    <Icon name="log-in" size={18} /> تسجيل الدخول
+                                </button>
                             </div>
                         </div>
                     </header>
+
+                    {/* ✅ Login Modal */}
+                    <AuthModal 
+                        isOpen={showLoginModal}
+                        onClose={() => setShowLoginModal(false)}
+                        onGoogleLogin={handleGoogleLogin}
+                        onPhoneLogin={handlePhoneLogin}
+                    />
 
                     {showPhoneLogin && (
                         <PhoneLoginModal
@@ -2126,14 +2200,15 @@
 
             if (view === 'complete-profile') return (
                 <div className="min-h-screen bg-brand-dark flex items-center justify-center p-4">
-                    <div className="glass-panel p-8 w-full max-w-2xl animate-slide-up">
+                    <div className="glass-panel p-8 w-full max-w-2xl animate-slide-up border-t-4 border-brand-accent">
                         <div className="text-center mb-8">
-                            <img src={user?.photo} className="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-brand-accent" />
-                            <h2 className="text-3xl font-bold text-white mb-2">أهلاً {user?.name}! 👋</h2>
-                            <p className="text-slate-400">كمل بياناتك عشان نبدأ رحلة النجاح</p>
+                            <img src={user?.photo || 'https://via.placeholder.com/150'} className="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-brand-accent" />
+                            <h2 className="text-3xl font-bold text-white mb-2">أهلاً بك يا بطل! 👋</h2>
+                            <p className="text-slate-400">استكمل بياناتك بدقة عشان طلبك يوصل للإدارة</p>
                         </div>
 
                         <div className="space-y-4">
+                            {/* نوع الحساب */}
                             <div className="flex gap-4 mb-6">
                                 <button onClick={() => setRegData({ ...regData, accountType: 'student' })}
                                     className={`flex-1 p-4 rounded-xl border-2 transition ${regData.accountType === 'student' ? 'border-brand-accent bg-brand-accent/10' : 'border-white/10'}`}>
@@ -2147,42 +2222,93 @@
                                 </button>
                             </div>
 
+                            {/* الاسم الثلاثي - حروف فقط */}
                             <div className="glass-panel p-4 border border-white/10">
                                 <h4 className="text-sm font-bold text-brand-accent mb-3 flex items-center gap-2">
-                                    <Icon name="user" size={16} /> الاسم الثلاثي
+                                    <Icon name="user" size={16} /> الاسم الثلاثي (باللغة العربية)
                                 </h4>
                                 <div className="grid md:grid-cols-3 gap-4">
-                                    {/* FIX 2: Added regex validation for Name inputs (Letters and spaces only) */}
-                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center" placeholder="الاسم الأول" 
-                                           onChange={e => setRegData({ ...regData, firstName: e.target.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '') })} />
-                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center" placeholder="اسم الأب" 
-                                           onChange={e => setRegData({ ...regData, fatherName: e.target.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '') })} />
-                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center" placeholder="اسم الجد" 
-                                           onChange={e => setRegData({ ...regData, grandfatherName: e.target.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '') })} />
+                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center focus:border-brand-accent transition" 
+                                        placeholder="الاسم الأول"
+                                        value={regData.firstName}
+                                        onChange={e => {
+                                            const val = e.target.value;
+                                            if (/^[\u0600-\u06FFa-zA-Z\s]*$/.test(val)) setRegData({ ...regData, firstName: val });
+                                        }} 
+                                    />
+                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center focus:border-brand-accent transition" 
+                                        placeholder="اسم الأب"
+                                        value={regData.fatherName}
+                                        onChange={e => {
+                                            const val = e.target.value;
+                                            if (/^[\u0600-\u06FFa-zA-Z\s]*$/.test(val)) setRegData({ ...regData, fatherName: val });
+                                        }} 
+                                    />
+                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center focus:border-brand-accent transition" 
+                                        placeholder="اسم الجد"
+                                        value={regData.grandfatherName}
+                                        onChange={e => {
+                                            const val = e.target.value;
+                                            if (/^[\u0600-\u06FFa-zA-Z\s]*$/.test(val)) setRegData({ ...regData, grandfatherName: val });
+                                        }} 
+                                    />
+                                </div>
+                                <p className="text-xs text-slate-500 mt-2 text-center">⚠️ يرجى كتابة الاسم بدون أرقام أو رموز</p>
+                            </div>
+
+                            {/* أرقام الهواتف - أرقام فقط */}
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div className="relative">
+                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition" 
+                                        placeholder="رقم تليفونك (11 رقم)" 
+                                        maxLength="11"
+                                        value={regData.phone}
+                                        onChange={e => {
+                                            const val = e.target.value;
+                                            if (/^\d*$/.test(val)) setRegData({ ...regData, phone: val });
+                                            else showNotification('أرقام فقط مسموح بها في الهاتف', 'error');
+                                        }} 
+                                    />
+                                    <div className="absolute left-4 top-4 text-slate-500"><Icon name="smartphone" size={18}/></div>
+                                </div>
+                                <div className="relative">
+                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition" 
+                                        placeholder="رقم ولي الأمر (11 رقم)" 
+                                        maxLength="11"
+                                        value={regData.parentPhone}
+                                        onChange={e => {
+                                            const val = e.target.value;
+                                            if (/^\d*$/.test(val)) setRegData({ ...regData, parentPhone: val });
+                                            else showNotification('أرقام فقط مسموح بها', 'error');
+                                        }} 
+                                    />
+                                    <div className="absolute left-4 top-4 text-slate-500"><Icon name="phone" size={18}/></div>
                                 </div>
                             </div>
 
-                            <div className="grid md:grid-cols-2 gap-4">
-                                {/* FIX 2: Phone number validation (numbers only) + maxLength */}
-                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white" placeholder="رقم تليفونك 📱" maxLength="11"
-                                       onChange={e => setRegData({ ...regData, phone: e.target.value.replace(/[^0-9]/g, '') })} />
-                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white" placeholder="رقم ولي الأمر 👨‍👩‍👦" maxLength="11"
-                                       onChange={e => setRegData({ ...regData, parentPhone: e.target.value.replace(/[^0-9]/g, '') })} />
-                            </div>
-
-                            <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white" placeholder="اسم المدرسة 🏫" 
-                                   onChange={e => setRegData({ ...regData, school: e.target.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '') })} />
+                            {/* بيانات المدرسة والعنوان */}
+                            <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition" 
+                                placeholder="اسم المدرسة 🏫" 
+                                value={regData.school}
+                                onChange={e => setRegData({ ...regData, school: e.target.value })} 
+                            />
 
                             <div className="grid md:grid-cols-2 gap-4">
-                                {/* FIX 2: City & Governorate validation (letters and spaces only) */}
-                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white" placeholder="المحافظة 🗺️" 
-                                       onChange={e => setRegData({ ...regData, governorate: e.target.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '') })} />
-                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white" placeholder="المدينة 📍" 
-                                       onChange={e => setRegData({ ...regData, city: e.target.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '') })} />
+                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition" 
+                                    placeholder="المحافظة 🗺️" 
+                                    value={regData.governorate}
+                                    onChange={e => setRegData({ ...regData, governorate: e.target.value })} 
+                                />
+                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition" 
+                                    placeholder="المدينة 📍" 
+                                    value={regData.city}
+                                    onChange={e => setRegData({ ...regData, city: e.target.value })} 
+                                />
                             </div>
 
                             {regData.accountType === 'student' && (
-                                <select className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white" onChange={e => setRegData({ ...regData, grade: e.target.value })}>
+                                <select className="w-full p-4 bg-black/30 border border-white/10 rounded-xl outline-none text-white appearance-none cursor-pointer" 
+                                    onChange={e => setRegData({ ...regData, grade: e.target.value })} value={regData.grade}>
                                     <option value="1sec">الصف الأول الثانوي</option>
                                     <option value="2sec">الصف الثاني الثانوي</option>
                                     <option value="3sec">الصف الثالث الثانوي</option>
@@ -2190,15 +2316,18 @@
                             )}
 
                             {regData.accountType === 'parent' && (
-                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white" placeholder="إيميل الطالب المرتبط" onChange={e => setRegData({ ...regData, linkedStudentEmail: e.target.value })} />
+                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white" 
+                                    placeholder="إيميل الطالب المرتبط (اختياري)" 
+                                    onChange={e => setRegData({ ...regData, linkedStudentEmail: e.target.value })} 
+                                />
                             )}
 
                             <div className="glass-panel p-4 border border-blue-500/20">
                                 <h4 className="text-sm font-bold text-blue-400 mb-3 flex items-center gap-2">
-                                    <Icon name="edit-3" size={16} /> ♞ وصف لنفسي (إجباري)
+                                    <Icon name="edit-3" size={16} /> ♞ نبذة عنك (إجباري)
                                 </h4>
                                 <textarea
-                                    placeholder="اكتب نبذة عن نفسك... من أنت؟ ما طموحاتك؟"
+                                    placeholder="اكتب وصف لنفسك... من أنت؟ وما هو هدفك؟ (للمساعدة في قبولك)"
                                     className="w-full p-4 bg-white/5 border border-blue-500/20 rounded-xl outline-none text-white h-24 resize-none placeholder-slate-500"
                                     onChange={e => setRegData({ ...regData, bio: e.target.value })}
                                 />
@@ -2206,9 +2335,9 @@
 
                             <button 
                                 onClick={handleStudentRegistration}
-                                className="btn-main w-full py-4 rounded-xl text-lg font-bold flex items-center justify-center gap-2 hover:scale-105 transition-transform"
+                                className="btn-main w-full py-4 rounded-xl text-lg font-bold flex items-center justify-center gap-2 hover:scale-105 transition-transform shadow-lg shadow-brand-accent/20"
                             >
-                                <Icon name="send" /> حفظ البيانات والمتابعة
+                                <Icon name="send" /> حفظ البيانات وإرسال الطلب
                             </button>
                         </div>
                     </div>
