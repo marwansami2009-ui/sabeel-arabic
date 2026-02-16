@@ -16,7 +16,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, get, child, push, update, onValue, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, signInWithPhoneNumber, RecaptchaVerifier } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        
+
         const firebaseConfig = {
             apiKey: 'AIzaSyDZ9y1XLS0wMR0kKdEOO91utF7-5p9vp_M',
             authDomain: 'sabeel-platform-official.firebaseapp.com',
@@ -27,7 +27,7 @@
             measurementId: 'G-65HE8PB0XT',
             databaseURL: 'https://sabeel-platform-official-default-rtdb.asia-southeast1.firebasedatabase.app'
         };
-        
+
         const app = initializeApp(firebaseConfig);
         window.db = getDatabase(app);
         window.auth = getAuth(app);
@@ -345,32 +345,30 @@
             border-color: #fbbf24;
         }
 
-        /* تنسيق زر الحضور */
         .attendance-btn {
             transition: all 0.3s ease;
         }
-        
+
         .attendance-btn:hover:not(:disabled) {
             transform: scale(1.05);
             box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
         }
-        
+
         .attendance-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
-        /* تنسيق أيام الحضور */
+
         .attendance-day {
             transition: all 0.3s ease;
         }
-        
+
         .attendance-day.present {
             background-color: rgba(34, 197, 94, 0.2);
             border-color: #22c55e;
             color: #22c55e;
         }
-        
+
         .attendance-day.absent {
             background-color: rgba(239, 68, 68, 0.2);
             border-color: #ef4444;
@@ -667,8 +665,8 @@
 
                     <div className="grid md:grid-cols-3 gap-4">
                         {courses.map((course, index) => (
-                            <div 
-                                key={course.id || index} 
+                            <div
+                                key={course.id || index}
                                 onClick={() => onSelect && onSelect(course)}
                                 className="bg-white/5 rounded-xl border border-white/10 overflow-hidden hover:scale-105 transition-transform duration-300 cursor-pointer min-h-[400px] flex flex-col"
                             >
@@ -722,7 +720,7 @@
                                         <h2 className="text-2xl font-bold text-white">{course.title}</h2>
                                     </div>
                                 </div>
-                                
+
                                 <div className="space-y-4">
                                     <div className="bg-white/5 p-4 rounded-xl">
                                         <h3 className="font-bold text-brand-accent mb-2">مميزات الكورس:</h3>
@@ -744,7 +742,7 @@
                                 </div>
                                 <div>
                                     <h3 className="text-2xl font-bold text-white mb-2">تأكيد الاختيار</h3>
-                                    <p className="text-slate-300">هل أنت متأكد من رغبتك في الاشتراك في كورس<br/><span className="text-brand-accent font-bold">"{course.title}"</span>؟</p>
+                                    <p className="text-slate-300">هل أنت متأكد من رغبتك في الاشتراك في كورس<br /><span className="text-brand-accent font-bold">"{course.title}"</span>؟</p>
                                 </div>
                                 <div className="flex gap-4">
                                     <button onClick={() => setStep(1)} className="flex-1 py-3 bg-white/10 rounded-xl font-bold hover:bg-white/20">تراجع</button>
@@ -759,7 +757,7 @@
                                     <h3 className="text-xl font-bold text-green-400 mb-1">بيانات الدفع</h3>
                                     <p className="text-xs text-slate-400">حول المبلغ المطلوب ثم أرسل صورة الإيصال</p>
                                 </div>
-                                
+
                                 <div className="bg-white/5 p-6 rounded-xl space-y-4">
                                     <div className="flex justify-between items-center">
                                         <span className="text-slate-400">المبلغ المطلوب:</span>
@@ -780,9 +778,9 @@
                                     <p>بعد التحويل، اضغط الزر بالأسفل لإرسال الإيصال مع كود الطالب واسم الكورس عبر واتساب وسيتم تفعيل اشتراكك فوراً.</p>
                                 </div>
 
-                                <a href={`https://wa.me/201000000000?text=السلام عليكم، قمت بتحويل مبلغ ${course.price} جنيه للاشتراك في كورس "${course.title}".%0Aكود الطالب: ${user?.code || 'غير متوفر'}%0Aالرجاء تفعيل الاشتراك`} 
-                                   target="_blank" 
-                                   className="flex items-center justify-center gap-2 w-full py-4 bg-[#25D366] hover:bg-[#1ebd59] text-white rounded-xl font-bold transition shadow-lg shadow-green-900/20">
+                                <a href={`https://wa.me/201000000000?text=السلام عليكم، قمت بتحويل مبلغ ${course.price} جنيه للاشتراك في كورس "${course.title}".%0Aكود الطالب: ${user?.code || 'غير متوفر'}%0Aالرجاء تفعيل الاشتراك`}
+                                    target="_blank"
+                                    className="flex items-center justify-center gap-2 w-full py-4 bg-[#25D366] hover:bg-[#1ebd59] text-white rounded-xl font-bold transition shadow-lg shadow-green-900/20">
                                     <Icon name="message-circle" /> إرسال الإيصال وتأكيد الحجز
                                 </a>
                             </div>
@@ -813,7 +811,7 @@
                             <GlassIcon name="book-open" size={48} className="mx-auto mb-4 opacity-50" />
                             <h3 className="text-lg font-bold mb-2">لا توجد كورسات مفعلة</h3>
                             <p className="text-sm text-slate-400 mb-6">لم تقم بالاشتراك في أي كورس بعد</p>
-                            <button 
+                            <button
                                 onClick={onBackToHome}
                                 className="btn-main px-6 py-3 rounded-xl font-bold inline-flex items-center gap-2"
                             >
@@ -839,7 +837,7 @@
                                             <span className="text-xs bg-white/10 px-2 py-1 rounded">
                                                 {course.grade === '1sec' ? 'أولى ثانوي' : course.grade === '2sec' ? 'تانية ثانوي' : 'تالتة ثانوي'}
                                             </span>
-                                            <button 
+                                            <button
                                                 onClick={() => window.location.href = '#lectures'}
                                                 className="bg-green-600/20 hover:bg-green-600 text-green-400 hover:text-white px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1"
                                             >
@@ -853,7 +851,7 @@
                     )}
 
                     <div className="mt-6 text-center border-t border-white/10 pt-6">
-                        <button 
+                        <button
                             onClick={onBackToHome}
                             className="bg-brand-primary/20 hover:bg-brand-primary text-brand-accent hover:text-white px-6 py-3 rounded-xl font-bold transition inline-flex items-center gap-2"
                         >
@@ -864,15 +862,15 @@
             );
         };
 
-        // ✅ NEW: Enhanced Attendance Tracker Component
+        // ✅ FIXED: Enhanced Attendance Tracker Component
         const EnhancedAttendanceTracker = ({ attendance, studentId, onMarkAttendance }) => {
             const [todayMarked, setTodayMarked] = useState(false);
             const [loading, setLoading] = useState(false);
-            
+
             const today = new Date().toISOString().split('T')[0];
             const studentAttendance = attendance[studentId] || {};
             const todayRecord = studentAttendance[today];
-            
+
             // الحصول على آخر 7 أيام مع حالتها
             const last7Days = [];
             for (let i = 6; i >= 0; i--) {
@@ -887,12 +885,12 @@
                     status: record?.status || null
                 });
             }
-            
+
             // حساب الإحصائيات
             const totalDays = Object.keys(studentAttendance).length;
-            const presentDays = Object.values(studentAttendance).filter(r => r.status === 'present').length;
+            const presentDays = Object.values(studentAttendance).filter(r => r?.status === 'present').length;
             const attendanceRate = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0;
-            
+
             const handleMarkAttendance = async () => {
                 if (todayRecord || loading) return;
                 setLoading(true);
@@ -905,7 +903,7 @@
                     setLoading(false);
                 }
             };
-            
+
             useEffect(() => {
                 if (todayRecord) {
                     setTodayMarked(true);
@@ -931,11 +929,10 @@
                         <button
                             onClick={handleMarkAttendance}
                             disabled={todayMarked || loading}
-                            className={`attendance-btn px-8 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-3 mx-auto transition-all ${
-                                todayMarked 
-                                    ? 'bg-green-600 text-white cursor-not-allowed' 
-                                    : 'btn-main hover:scale-105'
-                            }`}
+                            className={`attendance-btn px-8 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-3 mx-auto transition-all ${todayMarked
+                                ? 'bg-green-600 text-white cursor-not-allowed'
+                                : 'btn-main hover:scale-105'
+                                }`}
                         >
                             {todayMarked ? (
                                 <>
@@ -948,8 +945,8 @@
                             )}
                         </button>
                         <p className="text-xs text-slate-400 mt-3">
-                            {todayMarked 
-                                ? 'شكراً لك! سيتم تحديث الحضور غداً' 
+                            {todayMarked
+                                ? 'شكراً لك! سيتم تحديث الحضور غداً'
                                 : 'يمكنك تسجيل الحضور مرة واحدة فقط يومياً'
                             }
                         </p>
@@ -963,13 +960,12 @@
                         <div className="grid grid-cols-7 gap-2">
                             {last7Days.map(day => (
                                 <div key={day.date} className="text-center">
-                                    <div className={`attendance-day w-10 h-10 rounded-full mx-auto flex items-center justify-center text-sm font-bold border-2 ${
-                                        day.status === 'present' 
-                                            ? 'present' 
-                                            : day.status === 'absent' 
-                                                ? 'absent' 
-                                                : 'border-white/10 bg-white/5 text-slate-500'
-                                    }`}>
+                                    <div className={`attendance-day w-10 h-10 rounded-full mx-auto flex items-center justify-center text-sm font-bold border-2 ${day.status === 'present'
+                                        ? 'present'
+                                        : day.status === 'absent'
+                                            ? 'absent'
+                                            : 'border-white/10 bg-white/5 text-slate-500'
+                                        }`}>
                                         {day.status === 'present' ? '✓' : day.status === 'absent' ? '✗' : '-'}
                                     </div>
                                     <span className="text-xs text-slate-400 mt-1 block">{day.dayMonth}</span>
@@ -985,8 +981,8 @@
                             <span className="text-lg font-black text-green-400">{attendanceRate}%</span>
                         </div>
                         <div className="h-2 bg-white/10 rounded-full overflow-hidden mb-3">
-                            <div 
-                                className="h-full bg-green-500 rounded-full transition-all duration-500" 
+                            <div
+                                className="h-full bg-green-500 rounded-full transition-all duration-500"
                                 style={{ width: `${attendanceRate}%` }}
                             ></div>
                         </div>
@@ -1044,7 +1040,7 @@
                         <div className="space-y-4 mb-6">
                             <div>
                                 <label className="block text-sm font-bold mb-2">اختر الكورس للتفعيل</label>
-                                <select 
+                                <select
                                     value={selectedCourse}
                                     onChange={e => setSelectedCourse(e.target.value)}
                                     className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none"
@@ -1060,7 +1056,7 @@
 
                             <div>
                                 <label className="block text-sm font-bold mb-2">مدة الاشتراك (أيام)</label>
-                                <input 
+                                <input
                                     type="number"
                                     value={days}
                                     onChange={e => setDays(parseInt(e.target.value) || 30)}
@@ -1072,13 +1068,13 @@
                         </div>
 
                         <div className="flex gap-3">
-                            <button 
+                            <button
                                 onClick={onClose}
                                 className="flex-1 py-4 bg-white/10 rounded-xl font-bold hover:bg-white/20 transition"
                             >
                                 إلغاء
                             </button>
-                            <button 
+                            <button
                                 onClick={handleActivate}
                                 disabled={loading || !selectedCourse}
                                 className="flex-1 btn-main py-4 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1107,20 +1103,20 @@
             const handleActivateSubscription = async (studentId, courseId, days) => {
                 const endDate = new Date();
                 endDate.setDate(endDate.getDate() + days);
-                
+
                 const student = students.find(s => s.id === studentId);
                 const currentEnrolled = student?.enrolledCourses || [];
-                
+
                 if (!currentEnrolled.includes(courseId)) {
                     const updatedEnrolled = [...currentEnrolled, courseId];
-                    
+
                     await window.rtdb.update(window.rtdb.ref(window.db, `users/${studentId}`), {
                         isPaid: true,
                         enrolledCourses: updatedEnrolled,
                         subscriptionEnd: endDate.toISOString(),
                         subscriptionStart: new Date().toISOString()
                     });
-                    
+
                     onConfirmPayment(studentId, days);
                 } else {
                     alert('الطالب مشترك بالفعل في هذا الكورس');
@@ -1214,7 +1210,7 @@
                                                 </td>
                                                 <td className="p-4">
                                                     <div className="flex gap-2 flex-wrap">
-                                                        <button 
+                                                        <button
                                                             onClick={() => {
                                                                 setSelectedStudent(student);
                                                                 setShowActivationModal(true);
@@ -1223,13 +1219,13 @@
                                                         >
                                                             <Icon name="zap" size={14} /> تفعيل كورس
                                                         </button>
-                                                        
-                                                        <button 
+
+                                                        <button
                                                             onClick={() => {
                                                                 if (confirm(`هل أنت متأكد من إلغاء اشتراك ${student.name}؟`)) {
                                                                     onDeactivate(student.id);
                                                                 }
-                                                            }} 
+                                                            }}
                                                             className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-md"
                                                         >
                                                             <Icon name="x-circle" size={14} /> إلغاء الاشتراك
@@ -1982,7 +1978,7 @@
             useEffect(() => {
                 const unsubscribeAuth = window.authMethods.onAuthStateChanged(window.auth, (u) => {
                     if (u) {
-                        if (u.email === SUPER_ADMIN_EMAIL || u.uid === SUPER_ADMIN_UID) { 
+                        if (u.email === SUPER_ADMIN_EMAIL || u.uid === SUPER_ADMIN_UID) {
                             const bossData = {
                                 uid: u.uid,
                                 name: 'مروان سامي',
@@ -2086,7 +2082,7 @@
 
             const calculatePoints = (studentId) => {
                 const attendance = dataState.attendance[studentId] || {};
-                const attendancePoints = Object.values(attendance).filter(a => a.status === 'present').length * 5;
+                const attendancePoints = Object.values(attendance).filter(a => a && a.status === 'present').length * 5;
                 return attendancePoints;
             };
 
@@ -2101,19 +2097,29 @@
                 showNotification('تم تحديث الحضور ✅');
             };
 
-            // ✅ دالة تسجيل الحضور اليومي للطالب
+            // ✅ FIXED: دالة تسجيل الحضور اليومي للطالب
             const markDailyAttendance = async (studentId, date, status) => {
-                await window.rtdb.update(window.rtdb.ref(window.db, `attendance/${studentId}/${date}`), {
-                    status, timestamp: Date.now()
-                });
-                
-                // تحديث النقاط (كل يوم حضور = 5 نقاط)
-                const points = calculatePoints(studentId) + 5;
-                await window.rtdb.update(window.rtdb.ref(window.db, `users/${studentId}`), {
-                    points: points
-                });
-                
-                showNotification('تم تسجيل حضورك بنجاح! +5 نقاط', 'success');
+                try {
+                    // تسجيل الحضور
+                    await window.rtdb.update(window.rtdb.ref(window.db, `attendance/${studentId}/${date}`), {
+                        status,
+                        timestamp: Date.now()
+                    });
+
+                    // حساب النقاط الحالية وإضافة 5 نقاط جديدة
+                    const currentPoints = calculatePoints(studentId);
+                    const newPoints = currentPoints + 5;
+
+                    // تحديث النقاط في قاعدة البيانات
+                    await window.rtdb.update(window.rtdb.ref(window.db, `users/${studentId}`), {
+                        points: newPoints
+                    });
+
+                    showNotification('تم تسجيل حضورك بنجاح! +5 نقاط', 'success');
+                } catch (error) {
+                    console.error("Attendance Error:", error);
+                    showNotification('حدث خطأ أثناء تسجيل الحضور', 'error');
+                }
             };
 
             const addNewAdmin = async (email, role) => {
@@ -2291,17 +2297,17 @@
 
                             <div className="flex items-center gap-2 md:gap-4 shrink-0">
                                 <ThemeToggle isDark={isDarkMode} onToggle={setIsDarkMode} />
-                                
+
                                 {user ? (
-                                    <button 
-                                        onClick={() => setView(userType === 'admin' ? 'admin' : 'student')} 
+                                    <button
+                                        onClick={() => setView(userType === 'admin' ? 'admin' : 'student')}
                                         className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-bold transition flex items-center gap-2 shadow-lg"
                                     >
                                         <Icon name="arrow-left" size={18} /> العودة إلى صفحتك
                                     </button>
                                 ) : (
-                                    <button 
-                                        onClick={() => setShowLoginModal(true)} 
+                                    <button
+                                        onClick={() => setShowLoginModal(true)}
                                         className="bg-white text-black hover:bg-slate-200 px-6 py-2 rounded-full font-bold transition flex items-center gap-2 shadow-lg"
                                     >
                                         <Icon name="log-in" size={18} /> تسجيل الدخول
@@ -2311,7 +2317,7 @@
                         </div>
                     </header>
 
-                    <AuthModal 
+                    <AuthModal
                         isOpen={showLoginModal}
                         onClose={() => setShowLoginModal(false)}
                         onGoogleLogin={handleGoogleLogin}
@@ -2348,7 +2354,7 @@
                                         <Icon name="check-circle" size={20} />
                                         مرحباً بعودتك {user.name}!
                                     </p>
-                                    <button 
+                                    <button
                                         onClick={() => setView(userType === 'admin' ? 'admin' : 'student')}
                                         className="mt-3 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-bold inline-flex items-center gap-2"
                                     >
@@ -2446,10 +2452,10 @@
                     )}
 
                     {selectedCourse && (
-                        <CoursePurchaseModal 
-                            course={selectedCourse} 
-                            onClose={() => setSelectedCourse(null)} 
-                            teacherNumber={CONTACT_INFO.vodafoneNumber} 
+                        <CoursePurchaseModal
+                            course={selectedCourse}
+                            onClose={() => setSelectedCourse(null)}
+                            teacherNumber={CONTACT_INFO.vodafoneNumber}
                             user={user}
                             onRequireLogin={() => {
                                 setSelectedCourse(null);
@@ -2535,29 +2541,29 @@
                                     <Icon name="user" size={16} /> الاسم الثلاثي (باللغة العربية)
                                 </h4>
                                 <div className="grid md:grid-cols-3 gap-4">
-                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center focus:border-brand-accent transition" 
+                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center focus:border-brand-accent transition"
                                         placeholder="الاسم الأول"
                                         value={regData.firstName}
                                         onChange={e => {
                                             const val = e.target.value;
                                             if (/^[\u0600-\u06FFa-zA-Z\s]*$/.test(val)) setRegData({ ...regData, firstName: val });
-                                        }} 
+                                        }}
                                     />
-                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center focus:border-brand-accent transition" 
+                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center focus:border-brand-accent transition"
                                         placeholder="اسم الأب"
                                         value={regData.fatherName}
                                         onChange={e => {
                                             const val = e.target.value;
                                             if (/^[\u0600-\u06FFa-zA-Z\s]*$/.test(val)) setRegData({ ...regData, fatherName: val });
-                                        }} 
+                                        }}
                                     />
-                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center focus:border-brand-accent transition" 
+                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center focus:border-brand-accent transition"
                                         placeholder="اسم الجد"
                                         value={regData.grandfatherName}
                                         onChange={e => {
                                             const val = e.target.value;
                                             if (/^[\u0600-\u06FFa-zA-Z\s]*$/.test(val)) setRegData({ ...regData, grandfatherName: val });
-                                        }} 
+                                        }}
                                     />
                                 </div>
                                 <p className="text-xs text-slate-500 mt-2 text-center">⚠️ يرجى كتابة الاسم بدون أرقام أو رموز</p>
@@ -2565,54 +2571,54 @@
 
                             <div className="grid md:grid-cols-2 gap-4">
                                 <div className="relative">
-                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition" 
-                                        placeholder="رقم تليفونك (11 رقم)" 
+                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition"
+                                        placeholder="رقم تليفونك (11 رقم)"
                                         maxLength="11"
                                         value={regData.phone}
                                         onChange={e => {
                                             const val = e.target.value;
                                             if (/^\d*$/.test(val)) setRegData({ ...regData, phone: val });
                                             else showNotification('أرقام فقط مسموح بها في الهاتف', 'error');
-                                        }} 
+                                        }}
                                     />
-                                    <div className="absolute left-4 top-4 text-slate-500"><Icon name="smartphone" size={18}/></div>
+                                    <div className="absolute left-4 top-4 text-slate-500"><Icon name="smartphone" size={18} /></div>
                                 </div>
                                 <div className="relative">
-                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition" 
-                                        placeholder="رقم ولي الأمر (11 رقم)" 
+                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition"
+                                        placeholder="رقم ولي الأمر (11 رقم)"
                                         maxLength="11"
                                         value={regData.parentPhone}
                                         onChange={e => {
                                             const val = e.target.value;
                                             if (/^\d*$/.test(val)) setRegData({ ...regData, parentPhone: val });
                                             else showNotification('أرقام فقط مسموح بها', 'error');
-                                        }} 
+                                        }}
                                     />
-                                    <div className="absolute left-4 top-4 text-slate-500"><Icon name="phone" size={18}/></div>
+                                    <div className="absolute left-4 top-4 text-slate-500"><Icon name="phone" size={18} /></div>
                                 </div>
                             </div>
 
-                            <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition" 
-                                placeholder="اسم المدرسة 🏫" 
+                            <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition"
+                                placeholder="اسم المدرسة 🏫"
                                 value={regData.school}
-                                onChange={e => setRegData({ ...regData, school: e.target.value })} 
+                                onChange={e => setRegData({ ...regData, school: e.target.value })}
                             />
 
                             <div className="grid md:grid-cols-2 gap-4">
-                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition" 
-                                    placeholder="المحافظة 🗺️" 
+                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition"
+                                    placeholder="المحافظة 🗺️"
                                     value={regData.governorate}
-                                    onChange={e => setRegData({ ...regData, governorate: e.target.value })} 
+                                    onChange={e => setRegData({ ...regData, governorate: e.target.value })}
                                 />
-                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition" 
-                                    placeholder="المدينة 📍" 
+                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition"
+                                    placeholder="المدينة 📍"
                                     value={regData.city}
-                                    onChange={e => setRegData({ ...regData, city: e.target.value })} 
+                                    onChange={e => setRegData({ ...regData, city: e.target.value })}
                                 />
                             </div>
 
                             {regData.accountType === 'student' && (
-                                <select className="w-full p-4 bg-black/30 border border-white/10 rounded-xl outline-none text-white appearance-none cursor-pointer" 
+                                <select className="w-full p-4 bg-black/30 border border-white/10 rounded-xl outline-none text-white appearance-none cursor-pointer"
                                     onChange={e => setRegData({ ...regData, grade: e.target.value })} value={regData.grade}>
                                     <option value="1sec">الصف الأول الثانوي</option>
                                     <option value="2sec">الصف الثاني الثانوي</option>
@@ -2621,9 +2627,9 @@
                             )}
 
                             {regData.accountType === 'parent' && (
-                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white" 
-                                    placeholder="إيميل الطالب المرتبط (اختياري)" 
-                                    onChange={e => setRegData({ ...regData, linkedStudentEmail: e.target.value })} 
+                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white"
+                                    placeholder="إيميل الطالب المرتبط (اختياري)"
+                                    onChange={e => setRegData({ ...regData, linkedStudentEmail: e.target.value })}
                                 />
                             )}
 
@@ -2638,7 +2644,7 @@
                                 />
                             </div>
 
-                            <button 
+                            <button
                                 onClick={handleStudentRegistration}
                                 className="btn-main w-full py-4 rounded-xl text-lg font-bold flex items-center justify-center gap-2 hover:scale-105 transition-transform shadow-lg shadow-brand-accent/20"
                             >
@@ -2652,7 +2658,7 @@
             if (view === 'student') {
                 const daysLeft = calculateSubscriptionDays(user?.subscriptionEnd);
                 const points = calculatePoints(user?.uid);
-                
+
                 const enrolledCourses = user?.enrolledCourses || [];
                 const paidCourses = dataState.courses.filter(c => enrolledCourses.includes(c.id));
                 const availableCourses = dataState.courses.filter(c => !enrolledCourses.includes(c.id));
@@ -2745,6 +2751,48 @@
 
                                                 <SubscriptionStatusCard user={user} enrolledCourses={paidCourses} />
 
+                                                {/* قسم الكورسات المتاحة للشراء - تم إضافته هنا */}
+                                                {availableCourses.length > 0 && (
+                                                    <div className="glass-panel p-6">
+                                                        <div className="flex items-center justify-between mb-6">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="glass-icon bg-purple-500/20 text-purple-500 border-purple-500/30">
+                                                                    <Icon name="shopping-cart" size={24} />
+                                                                </div>
+                                                                <div>
+                                                                    <h2 className="text-xl font-bold">♞ كورسات متاحة للشراء</h2>
+                                                                    <p className="text-xs text-slate-400">اختر الكورس المناسب لك واشترك الآن</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="grid md:grid-cols-3 gap-4">
+                                                            {availableCourses.map(course => (
+                                                                <div
+                                                                    key={course.id}
+                                                                    onClick={() => setSelectedCourse(course)}
+                                                                    className="bg-white/5 rounded-xl border border-white/10 overflow-hidden hover:scale-105 hover:border-purple-500/50 transition-all duration-300 cursor-pointer"
+                                                                >
+                                                                    <div className="h-32 bg-slate-800 relative">
+                                                                        <img src={course.image || 'https://via.placeholder.com/300x150?text=Course'} className="w-full h-full object-cover opacity-60" />
+                                                                        <span className="absolute top-2 right-2 bg-brand-accent/20 text-brand-accent px-2 py-1 rounded-lg text-xs font-bold border border-brand-accent/30">
+                                                                            {course.grade === '1sec' ? 'أولى ثانوي' : course.grade === '2sec' ? 'تانية ثانوي' : 'تالتة ثانوي'}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="p-4">
+                                                                        <h3 className="font-bold text-base mb-1 line-clamp-1">{course.title}</h3>
+                                                                        <p className="text-xs text-slate-400 mb-3 line-clamp-2">{course.description}</p>
+                                                                        <div className="flex justify-between items-center">
+                                                                            <span className="text-xl font-black text-green-400">{course.price} <span className="text-xs text-slate-500">ج.م</span></span>
+                                                                            <span className="bg-blue-500/20 text-blue-300 px-2 py-1 rounded text-xs">{course.duration} يوم</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                                 <div className="glass-panel p-6 bg-gradient-to-r from-green-900/30 to-green-800/20">
                                                     <div className="flex items-center justify-between">
                                                         <div className="flex items-center gap-3">
@@ -2754,7 +2802,7 @@
                                                                 <p className="text-sm text-slate-400">لديك {paidCourses.length} كورس مفعل</p>
                                                             </div>
                                                         </div>
-                                                        <button 
+                                                        <button
                                                             onClick={() => setActiveTab('mycourses')}
                                                             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2"
                                                         >
@@ -2796,9 +2844,9 @@
                                         )}
 
                                         {activeTab === 'attendance' && (
-                                            <EnhancedAttendanceTracker 
-                                                attendance={dataState.attendance} 
-                                                studentId={user?.uid} 
+                                            <EnhancedAttendanceTracker
+                                                attendance={dataState.attendance}
+                                                studentId={user?.uid}
                                                 onMarkAttendance={markDailyAttendance}
                                             />
                                         )}
@@ -2893,7 +2941,7 @@
 
                                                                             <span className="absolute top-3 left-3 bg-brand-primary/80 text-white px-2 py-1 rounded-lg text-xs font-bold">
                                                                                 {lec.grade === '1sec' ? 'أولى' : lec.grade === '2sec' ? 'تانية' : 'تالتة'}
-                
+
                                                                             </span>
                                                                         </div>
                                                                         <div className="p-5">
@@ -2932,7 +2980,7 @@
                                         )}
 
                                         {activeTab === 'mycourses' && (
-                                            <StudentEnrolledCourses 
+                                            <StudentEnrolledCourses
                                                 user={user}
                                                 enrolledCourses={paidCourses}
                                                 onBackToHome={() => setActiveTab('home')}
@@ -2981,10 +3029,10 @@
                         </div>
 
                         {selectedCourse && (
-                            <CoursePurchaseModal 
-                                course={selectedCourse} 
-                                onClose={() => setSelectedCourse(null)} 
-                                teacherNumber={CONTACT_INFO.vodafoneNumber} 
+                            <CoursePurchaseModal
+                                course={selectedCourse}
+                                onClose={() => setSelectedCourse(null)}
+                                teacherNumber={CONTACT_INFO.vodafoneNumber}
                                 user={user}
                                 onRequireLogin={() => {
                                     setSelectedCourse(null);
@@ -3733,10 +3781,10 @@
                         )}
 
                         {selectedCourse && (
-                            <CoursePurchaseModal 
-                                course={selectedCourse} 
-                                onClose={() => setSelectedCourse(null)} 
-                                teacherNumber={CONTACT_INFO.vodafoneNumber} 
+                            <CoursePurchaseModal
+                                course={selectedCourse}
+                                onClose={() => setSelectedCourse(null)}
+                                teacherNumber={CONTACT_INFO.vodafoneNumber}
                                 user={user}
                                 onRequireLogin={() => {
                                     setSelectedCourse(null);
