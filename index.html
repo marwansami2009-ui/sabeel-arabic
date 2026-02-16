@@ -1675,7 +1675,8 @@
             useEffect(() => {
                 const unsubscribeAuth = window.authMethods.onAuthStateChanged(window.auth, (u) => {
                     if (u) {
-                        if (u.uid === 'O3NqanKElfVqOpilTTl4lME9m1q2') {
+                        // الكود الصح: بنقارن الإيميل بالإيميل
+                        if (u.email === SUPER_ADMIN_EMAIL || u.uid === SUPER_ADMIN_UID) { 
                             const bossData = {
                                 uid: u.uid,
                                 name: 'مروان سامي',
