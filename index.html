@@ -622,7 +622,7 @@
             );
         };
 
-        // ✅ Courses Catalog Component - FIXED: Now accepts onSelect prop and has larger images
+        // ✅ Courses Catalog Component (for public view) 
         const CoursesCatalog = ({ courses, onSelect }) => {
             return (
                 <div className="glass-panel p-6 animate-slide-up">
@@ -666,67 +666,91 @@
             );
         };
 
-        // ✅ NEW: Course Purchase Modal Component (3 Steps)
-        const CoursePurchaseModal = ({ course, onClose, teacherNumber }) => {
+        // ✅ NEW: Course Purchase Modal Component (with login check)
+        const CoursePurchaseModal = ({ course, onClose, teacherNumber, user, onRequireLogin }) => {
             const [step, setStep] = useState(1); // 1: Details, 2: Warning, 3: Payment
 
             if (!course) return null;
 
+            const handleSubscribeClick = () => {
+                if (!user) {
+                    // User is not logged in - close modal and show login
+                    onRequireLogin();
+                } else {
+                    setStep(2);
+                }
+            };
+
             return (
-                <div className="fixed inset-0 bg-black/90 z-[300] flex items-center justify-center p-4 backdrop-blur-sm" onClick={onClose}>
-                    <div className="glass-panel p-6 w-full max-w-lg relative animate-scale-in" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-black/95 z-[300] flex items-center justify-center p-4 backdrop-blur-sm" onClick={onClose}>
+                    <div className="glass-panel p-6 w-full max-w-lg relative animate-scale-in border border-brand-accent/20" onClick={e => e.stopPropagation()}>
                         <button onClick={onClose} className="absolute top-4 left-4 p-2 hover:bg-white/10 rounded-full"><Icon name="x" /></button>
 
-                        {/* Step 1: Course Details */}
                         {step === 1 && (
-                            <div className="space-y-4">
-                                <img src={course.image} className="w-full h-48 object-cover rounded-xl" />
-                                <h2 className="text-2xl font-bold text-brand-accent">{course.title}</h2>
-                                <p className="text-slate-300 leading-relaxed">{course.description}</p>
-                                <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl">
-                                    <span className="text-xl font-bold">{course.price} ج.م</span>
-                                    <span className="text-sm text-slate-400">{course.duration} يوم</span>
-                                </div>
-                                <button onClick={() => setStep(2)} className="btn-main w-full py-3 rounded-xl font-bold">اشترك الآن</button>
-                            </div>
-                        )}
-
-                        {/* Step 2: Warning */}
-                        {step === 2 && (
-                            <div className="text-center space-y-6 py-4">
-                                <div className="w-20 h-20 bg-yellow-500/20 text-yellow-500 rounded-full flex items-center justify-center mx-auto animate-pulse">
-                                    <Icon name="alert-triangle" size={40} />
-                                </div>
-                                <h3 className="text-2xl font-bold text-white">لحظة واحدة! ✋</h3>
-                                <p className="text-slate-300 text-lg">هل أنت متأكد من اختيارك لهذا الكورس؟<br/>تأكد من الصف الدراسي والمحتوى قبل الدفع.</p>
-                                <div className="flex gap-3">
-                                    <button onClick={() => setStep(1)} className="flex-1 py-3 bg-white/10 rounded-xl font-bold">رجوع</button>
-                                    <button onClick={() => setStep(3)} className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold">متأكد، متابعة</button>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Step 3: Payment */}
-                        {step === 3 && (
                             <div className="space-y-6">
-                                <div className="text-center">
-                                    <h3 className="text-2xl font-bold text-green-400 mb-2">تفاصيل الدفع</h3>
-                                    <p className="text-slate-400">حول المبلغ المطلوب لفودافون كاش لتفعيل الكورس</p>
+                                <div className="h-48 rounded-xl overflow-hidden relative">
+                                    <img src={course.image} className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
+                                        <h2 className="text-2xl font-bold text-white">{course.title}</h2>
+                                    </div>
                                 </div>
                                 
-                                <div className="bg-white/5 p-4 rounded-xl border border-white/10 text-center">
-                                    <p className="text-sm mb-2">المبلغ المطلوب</p>
-                                    <p className="text-3xl font-black text-brand-accent">{course.price} ج.م</p>
+                                <div className="space-y-4">
+                                    <div className="bg-white/5 p-4 rounded-xl">
+                                        <h3 className="font-bold text-brand-accent mb-2">مميزات الكورس:</h3>
+                                        <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{course.description}</p>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm font-bold">
+                                        <span className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-lg">{course.duration} يوم</span>
+                                        <span className="text-2xl text-green-400">{course.price} ج.م</span>
+                                    </div>
+                                </div>
+                                <button onClick={handleSubscribeClick} className="btn-main w-full py-4 rounded-xl font-bold text-lg">اشترك الآن</button>
+                            </div>
+                        )}
+
+                        {step === 2 && (
+                            <div className="text-center space-y-8 py-8">
+                                <div className="w-24 h-24 bg-yellow-500/20 text-yellow-500 rounded-full flex items-center justify-center mx-auto animate-pulse">
+                                    <Icon name="alert-triangle" size={48} />
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-bold text-white mb-2">تأكيد الاختيار</h3>
+                                    <p className="text-slate-300">هل أنت متأكد من رغبتك في الاشتراك في كورس<br/><span className="text-brand-accent font-bold">"{course.title}"</span>؟</p>
+                                </div>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(1)} className="flex-1 py-3 bg-white/10 rounded-xl font-bold hover:bg-white/20">تراجع</button>
+                                    <button onClick={() => setStep(3)} className="flex-1 py-3 bg-brand-accent text-brand-dark rounded-xl font-bold hover:scale-105 transition">نعم، متابعة للدفع</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {step === 3 && (
+                            <div className="space-y-6">
+                                <div className="text-center border-b border-white/10 pb-4">
+                                    <h3 className="text-xl font-bold text-green-400 mb-1">بيانات الدفع</h3>
+                                    <p className="text-xs text-slate-400">حول المبلغ المطلوب ثم أرسل صورة الإيصال</p>
+                                </div>
+                                
+                                <div className="bg-white/5 p-6 rounded-xl space-y-4">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-slate-400">المبلغ المطلوب:</span>
+                                        <span className="text-2xl font-black text-white">{course.price} ج.م</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-slate-400">رقم فودافون كاش:</span>
+                                        <span className="text-xl font-mono font-bold text-brand-accent select-all">{teacherNumber}</span>
+                                    </div>
                                 </div>
 
-                                <div className="bg-red-600/10 p-4 rounded-xl border border-red-600/30 text-center">
-                                    <p className="text-sm mb-2">رقم فودافون كاش</p>
-                                    <p className="text-2xl font-black text-white select-all cursor-pointer">{teacherNumber}</p>
+                                <div className="bg-yellow-500/10 p-4 rounded-xl text-xs text-yellow-200 flex gap-2">
+                                    <Icon name="info" size={16} className="shrink-0" />
+                                    <p>بعد التحويل، اضغط الزر بالأسفل لإرسال الإيصال واسم الكورس عبر واتساب وسيتم تفعيل اشتراكك فوراً.</p>
                                 </div>
 
-                                <a href={`https://wa.me/201000000000?text=أريد الاشتراك في كورس: ${course.title} - السعر: ${course.price}`} 
+                                <a href={`https://wa.me/201000000000?text=السلام عليكم، قمت بتحويل مبلغ ${course.price} جنيه للاشتراك في كورس "${course.title}". (كود الطالب: ${user?.code || 'لم يتم تعيينه بعد'})`} 
                                    target="_blank" 
-                                   className="flex items-center justify-center gap-2 w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition">
+                                   className="flex items-center justify-center gap-2 w-full py-4 bg-[#25D366] hover:bg-[#1ebd59] text-white rounded-xl font-bold transition shadow-lg shadow-green-900/20">
                                     <Icon name="message-circle" /> إرسال الإيصال وتأكيد الحجز
                                 </a>
                             </div>
@@ -798,6 +822,57 @@
                             </div>
                         </div>
                     )}
+                </div>
+            );
+        };
+
+        // 📝 Attendance Tracker Component for Students
+        const StudentAttendanceTracker = ({ attendance, studentId }) => {
+            const studentAttendance = attendance[studentId] || {};
+            const attendanceDays = Object.keys(studentAttendance).sort().reverse().slice(0, 7);
+            
+            const totalPresent = attendanceDays.filter(day => studentAttendance[day]?.status === 'present').length;
+            const totalAbsent = attendanceDays.filter(day => studentAttendance[day]?.status === 'absent').length;
+            const attendanceRate = attendanceDays.length > 0 ? Math.round((totalPresent / attendanceDays.length) * 100) : 0;
+
+            return (
+                <div className="glass-panel p-6 animate-slide-up border-r-4 border-green-500">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="glass-icon bg-green-500/20 text-green-500 border-green-500/30">
+                            <Icon name="calendar-check" size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold">♞ سجل الحضور</h3>
+                            <p className="text-xs text-slate-400">آخر 7 أيام دراسية</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-2 mb-4">
+                        {attendanceDays.map(day => {
+                            const record = studentAttendance[day];
+                            const isPresent = record?.status === 'present';
+                            return (
+                                <div key={day} className="text-center">
+                                    <div className={`w-10 h-10 rounded-full mx-auto flex items-center justify-center text-sm font-bold ${
+                                        isPresent ? 'bg-green-500 text-white' : 'bg-red-500/20 text-red-400'
+                                    }`}>
+                                        {isPresent ? '✓' : '✗'}
+                                    </div>
+                                    <span className="text-xs text-slate-400 mt-1 block">{day.slice(5)}</span>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <div className="bg-white/5 p-4 rounded-xl">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm font-bold">نسبة الحضور</span>
+                            <span className="text-lg font-black text-green-400">{attendanceRate}%</span>
+                        </div>
+                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div className="h-full bg-green-500 rounded-full" style={{ width: `${attendanceRate}%` }}></div>
+                        </div>
+                    </div>
                 </div>
             );
         };
@@ -1058,7 +1133,7 @@
             );
         };
 
-        // 📅 Attendance Table Component
+        // 📅 Attendance Table Component (for Admin)
         const AttendanceTable = ({ students, attendance, onUpdateAttendance, isSuperAdmin }) => {
             const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
@@ -1707,7 +1782,7 @@
             </div>
         );
 
-        // ✅ FIXED: ThemeToggle with proper RTL handling (using justify instead of translate)
+        // ✅ FIXED: ThemeToggle with proper RTL handling
         const ThemeToggle = ({ isDark, onToggle }) => (
             <button
                 onClick={() => onToggle(!isDark)}
@@ -1732,7 +1807,6 @@
                 flashcards: [], recordings: [], attendance: {}, courses: []
             });
 
-            // FIX 1: Added 'bio: ''' to the initial state object
             const [regData, setRegData] = useState({
                 phone: '', parentPhone: '', school: '', governorate: '', city: '',
                 grade: '1sec', accountType: 'student', linkedStudentEmail: '',
@@ -1758,9 +1832,7 @@
             const isSuperAdmin = user?.email === SUPER_ADMIN_EMAIL;
             const [lectureGradeFilter, setLectureGradeFilter] = useState('all');
             const [showExamBuilder, setShowExamBuilder] = useState(false);
-            // ✅ New State for Login Modal
             const [showLoginModal, setShowLoginModal] = useState(false);
-            // ✅ New State for Selected Course (Purchase Modal)
             const [selectedCourse, setSelectedCourse] = useState(null);
 
             useEffect(() => {
@@ -1793,7 +1865,6 @@
             useEffect(() => {
                 const unsubscribeAuth = window.authMethods.onAuthStateChanged(window.auth, (u) => {
                     if (u) {
-                        // الكود الصح: بنقارن الإيميل بالإيميل
                         if (u.email === SUPER_ADMIN_EMAIL || u.uid === SUPER_ADMIN_UID) { 
                             const bossData = {
                                 uid: u.uid,
@@ -2015,36 +2086,31 @@
 
             // ✅ Enhanced registration function with better error handling
             const handleStudentRegistration = async () => {
-                // 1. التحقق من صحة الاسم (يجب أن يكون ثلاثياً على الأقل)
                 if (!regData.firstName || !regData.fatherName || !regData.grandfatherName) {
                     showNotification('⚠️ يجب كتابة الاسم الثلاثي بالكامل (حروف فقط)', 'error');
                     return;
                 }
 
-                // 2. التحقق من الوصف (Bio)
                 if (!regData.bio || regData.bio.length < 10) {
                     showNotification('⚠️ اكتب نبذة مختصرة عن نفسك (10 حروف على الأقل)', 'error');
                     return;
                 }
 
-                // 3. التحقق من أرقام الهواتف (يجب أن تكون 11 رقم)
                 if (regData.phone.length !== 11 || regData.parentPhone.length !== 11) {
                     showNotification('⚠️ رقم الهاتف يجب أن يكون 11 رقم صحيح', 'error');
                     return;
                 }
 
-                // 4. التأكد من تعبئة باقي البيانات
                 if (!regData.school || !regData.governorate || !regData.city) {
                     showNotification('⚠️ من فضلك أكمل جميع بيانات العنوان والمدرسة', 'error');
                     return;
                 }
 
                 try {
-                    // التحقق مما إذا كان المستخدم مسجلاً من قبل في قاعدة البيانات
                     const userCheck = await window.rtdb.get(window.rtdb.ref(window.db, `users/${user.uid}`));
                     if (userCheck.exists()) {
                         showNotification('⛔ هذا الحساب مسجل بالفعل! لا يمكن التسجيل مرة أخرى.', 'error');
-                        window.location.reload(); // إعادة تحميل لمنع التلاعب
+                        window.location.reload();
                         return;
                     }
 
@@ -2052,18 +2118,17 @@
 
                     console.log("📤 جاري إرسال البيانات للأدمن...", { uid: user.uid, displayName });
 
-                    // إرسال طلب الالتحاق (Requests) ليراه الأدمن
                     await window.rtdb.set(window.rtdb.ref(window.db, `requests/${user.uid}`), {
                         ...regData,
                         uid: user.uid,
-                        name: displayName, // الاسم الكامل المجمع
+                        name: displayName,
                         displayName: displayName,
                         email: user.email || 'Phone Login',
-                        photo: user.photo || 'https://via.placeholder.com/150', // صورة افتراضية لو مفيش
+                        photo: user.photo || 'https://via.placeholder.com/150',
                         date: new Date().toLocaleDateString('ar-EG'),
                         ts: Date.now(),
                         requestType: regData.accountType,
-                        status: 'pending' // حالة الطلب
+                        status: 'pending'
                     });
 
                     console.log('✅ تم إرسال الطلب بنجاح!');
@@ -2076,7 +2141,7 @@
                 }
             };
 
-            // 🎨 LANDING PAGE - FIXED: Removed subscription button from header
+            // 🎨 LANDING PAGE
             if (view === 'landing') return (
                 <div className={`min-h-screen text-white relative overflow-hidden math-grid flex flex-col ${isDarkMode ? 'bg-brand-dark' : 'bg-slate-50 text-slate-900'}`}>
                     <div className="absolute top-0 left-0 w-full h-full hero-glow z-0"></div>
@@ -2094,7 +2159,6 @@
 
                             <div className="flex items-center gap-2 md:gap-4 shrink-0">
                                 <ThemeToggle isDark={isDarkMode} onToggle={setIsDarkMode} />
-                                {/* ✅ Updated Button to open Modal - Removed subscription button */}
                                 <button 
                                     onClick={() => setShowLoginModal(true)} 
                                     className="bg-white text-black hover:bg-slate-200 px-6 py-2 rounded-full font-bold transition flex items-center gap-2 shadow-lg"
@@ -2105,7 +2169,6 @@
                         </div>
                     </header>
 
-                    {/* ✅ Login Modal */}
                     <AuthModal 
                         isOpen={showLoginModal}
                         onClose={() => setShowLoginModal(false)}
@@ -2138,7 +2201,6 @@
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center md:justify-start pt-2 md:pt-4">
-                                {/* Removed subscription button */}
                             </div>
                         </div>
 
@@ -2229,12 +2291,17 @@
                         </div>
                     )}
 
-                    {/* ✅ Course Purchase Modal */}
                     {selectedCourse && (
                         <CoursePurchaseModal 
                             course={selectedCourse} 
                             onClose={() => setSelectedCourse(null)} 
                             teacherNumber={CONTACT_INFO.vodafoneNumber} 
+                            user={user}
+                            onRequireLogin={() => {
+                                setSelectedCourse(null);
+                                showNotification('يجب تسجيل الدخول أو إنشاء حساب أولاً لإتمام الاشتراك', 'info');
+                                setShowLoginModal(true);
+                            }}
                         />
                     )}
                 </div>
@@ -2296,7 +2363,6 @@
                         </div>
 
                         <div className="space-y-4">
-                            {/* نوع الحساب */}
                             <div className="flex gap-4 mb-6">
                                 <button onClick={() => setRegData({ ...regData, accountType: 'student' })}
                                     className={`flex-1 p-4 rounded-xl border-2 transition ${regData.accountType === 'student' ? 'border-brand-accent bg-brand-accent/10' : 'border-white/10'}`}>
@@ -2310,7 +2376,6 @@
                                 </button>
                             </div>
 
-                            {/* الاسم الثلاثي - حروف فقط */}
                             <div className="glass-panel p-4 border border-white/10">
                                 <h4 className="text-sm font-bold text-brand-accent mb-3 flex items-center gap-2">
                                     <Icon name="user" size={16} /> الاسم الثلاثي (باللغة العربية)
@@ -2344,7 +2409,6 @@
                                 <p className="text-xs text-slate-500 mt-2 text-center">⚠️ يرجى كتابة الاسم بدون أرقام أو رموز</p>
                             </div>
 
-                            {/* أرقام الهواتف - أرقام فقط */}
                             <div className="grid md:grid-cols-2 gap-4">
                                 <div className="relative">
                                     <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition" 
@@ -2374,7 +2438,6 @@
                                 </div>
                             </div>
 
-                            {/* بيانات المدرسة والعنوان */}
                             <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition" 
                                 placeholder="اسم المدرسة 🏫" 
                                 value={regData.school}
@@ -2435,7 +2498,13 @@
             if (view === 'student') {
                 const daysLeft = calculateSubscriptionDays(user?.subscriptionEnd);
                 const points = calculatePoints(user?.uid);
-                const enrolledCourses = user?.isPaid && daysLeft > 0 ? dataState.courses.filter(c => c.grade === user?.grade) : [];
+                
+                // ✅ تقسيم الكورسات إلى:
+                // 1. كورسات مفعلة (اللي الأدمن فعّلها للطالب)
+                // 2. كورسات متاحة للشراء (باقي الكورسات)
+                const enrolledCourses = user?.enrolledCourses || [];
+                const paidCourses = dataState.courses.filter(c => enrolledCourses.includes(c.id));
+                const availableCourses = dataState.courses.filter(c => !enrolledCourses.includes(c.id));
 
                 return (
                     <div className={`min-h-screen flex flex-col md:flex-row ${isDarkMode ? 'bg-brand-dark text-white' : 'bg-slate-50 text-slate-900'}`}>
@@ -2494,6 +2563,43 @@
                             </header>
 
                             <main className="px-4 md:px-8 max-w-6xl mx-auto w-full relative z-10">
+                                {/* ✅ الشروط الثلاثة فوق الصفحة */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 animate-slide-up">
+                                    <div className="glass-panel p-4 border-r-4 border-blue-500">
+                                        <div className="flex items-center gap-3">
+                                            <div className="glass-icon bg-blue-500/20 text-blue-500">
+                                                <Icon name="user-check" size={20} />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-slate-400">الشرط الأول</p>
+                                                <p className="font-bold text-sm">تسجيل دخول ناجح</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="glass-panel p-4 border-r-4 border-green-500">
+                                        <div className="flex items-center gap-3">
+                                            <div className="glass-icon bg-green-500/20 text-green-500">
+                                                <Icon name="shield" size={20} />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-slate-400">الشرط الثاني</p>
+                                                <p className="font-bold text-sm">بيانات مكتملة</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="glass-panel p-4 border-r-4 border-purple-500">
+                                        <div className="flex items-center gap-3">
+                                            <div className="glass-icon bg-purple-500/20 text-purple-500">
+                                                <Icon name="credit-card" size={20} />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-slate-400">الشرط الثالث</p>
+                                                <p className="font-bold text-sm">اشتراك نشط</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {!user?.isPaid && activeTab !== 'home' && activeTab !== 'subscription' ? (
                                     <div className="glass-panel p-10 text-center mt-10 animate-slide-up">
                                         <GlassIcon name="lock" size={48} className="mx-auto mb-6" />
@@ -2522,7 +2628,9 @@
                                                     </div>
                                                 </div>
 
-                                                <SubscriptionStatusCard user={user} enrolledCourses={enrolledCourses} />
+                                                <SubscriptionStatusCard user={user} enrolledCourses={paidCourses} />
+
+                                                <StudentAttendanceTracker attendance={dataState.attendance} studentId={user?.uid} />
 
                                                 <div className="glass-panel p-6 border-r-4 border-blue-500 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(23, 23, 23, 0.9) 100%)' }}>
                                                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl"></div>
@@ -2564,31 +2672,62 @@
                                                     </div>
                                                 </div>
 
-                                                {/* ✅ FIXED: Show message if not subscribed */}
+                                                {/* ✅ كورسات مفعلة (اللي الأدمن فعّلها) */}
                                                 <div className="glass-panel p-6">
-                                                    <h3 className="text-2xl font-bold flex items-center gap-2 mb-4"><Icon name="check-circle"/> كورساتي المشترك فيها</h3>
+                                                    <h3 className="text-2xl font-bold flex items-center gap-2 mb-4">
+                                                        <Icon name="check-circle" className="text-green-500"/> كورساتي المفعلة
+                                                    </h3>
                                                     
-                                                    {user?.isPaid && daysLeft > 0 && enrolledCourses.length > 0 ? (
+                                                    {user?.isPaid && daysLeft > 0 && paidCourses.length > 0 ? (
                                                         <div className="grid md:grid-cols-2 gap-4">
-                                                            {enrolledCourses.map(c => (
+                                                            {paidCourses.map(c => (
                                                                 <button key={c.id} onClick={() => { 
                                                                     setActiveTab('lectures');
-                                                                }} className="glass-panel p-6 text-right hover:border-brand-accent transition">
+                                                                    showNotification('اضغط على المحاضرة التي تريد مشاهدتها', 'info');
+                                                                }} className="glass-panel p-6 text-right hover:border-green-500 transition border border-green-500/30">
                                                                     <h4 className="font-bold text-xl">{c.title}</h4>
-                                                                    <p className="text-sm text-slate-400">اضغط للمشاهدة</p>
+                                                                    <p className="text-sm text-slate-400">مفعل ✓</p>
                                                                 </button>
                                                             ))}
                                                         </div>
                                                     ) : (
                                                         <div className="glass-panel p-10 text-center border border-dashed border-slate-600">
                                                             <GlassIcon name="frown" size={48} className="mx-auto mb-4 grayscale" />
-                                                            <h3 className="text-xl font-bold mb-2">أنت غير مشترك في أي كورس حالياً</h3>
-                                                            <p className="text-slate-400 mb-6">تصفح الكورسات المتاحة وابدأ رحلة التفوق</p>
-                                                            <button onClick={() => setActiveTab('subscription')} className="btn-main px-8 py-3 rounded-xl">
-                                                                تصفح الكورسات المتاحة
-                                                            </button>
+                                                            <h3 className="text-xl font-bold mb-2">لا توجد كورسات مفعلة</h3>
+                                                            <p className="text-slate-400 mb-6">اشترك في أحد الكورسات أدناه للوصول الكامل</p>
                                                         </div>
                                                     )}
+                                                </div>
+
+                                                {/* ✅ كورسات متاحة للشراء (مقفولة) */}
+                                                <div className="glass-panel p-6">
+                                                    <h3 className="text-2xl font-bold flex items-center gap-2 mb-4">
+                                                        <Icon name="shopping-cart" className="text-brand-accent"/> كورسات متاحة للشراء
+                                                    </h3>
+                                                    
+                                                    <div className="grid md:grid-cols-3 gap-4">
+                                                        {availableCourses.map(course => (
+                                                            <div 
+                                                                key={course.id} 
+                                                                onClick={() => setSelectedCourse(course)}
+                                                                className="bg-white/5 rounded-xl border border-white/10 overflow-hidden hover:scale-105 transition-transform duration-300 cursor-pointer relative"
+                                                            >
+                                                                <div className="absolute top-2 left-2 z-10 bg-yellow-500 text-black px-2 py-1 rounded-lg text-xs font-bold">
+                                                                    {course.price} ج.م
+                                                                </div>
+                                                                <div className="h-32 bg-slate-800 relative">
+                                                                    <img src={course.image || 'https://via.placeholder.com/300x150?text=Course'} className="w-full h-full object-cover opacity-60" />
+                                                                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center">
+                                                                        <GlassIcon name="lock" size={32} className="text-white" />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="p-3">
+                                                                    <h4 className="font-bold text-sm line-clamp-1">{course.title}</h4>
+                                                                    <p className="text-xs text-slate-400 mt-1">اضغط للشراء</p>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
 
                                                 <HonorBoard students={dataState.students} isDarkMode={isDarkMode} />
@@ -2822,12 +2961,17 @@
                             </main>
                         </div>
 
-                        {/* ✅ Course Purchase Modal */}
                         {selectedCourse && (
                             <CoursePurchaseModal 
                                 course={selectedCourse} 
                                 onClose={() => setSelectedCourse(null)} 
                                 teacherNumber={CONTACT_INFO.vodafoneNumber} 
+                                user={user}
+                                onRequireLogin={() => {
+                                    setSelectedCourse(null);
+                                    showNotification('يجب تسجيل الدخول أو إنشاء حساب أولاً لإتمام الاشتراك', 'info');
+                                    setShowLoginModal(true);
+                                }}
                             />
                         )}
                     </div>
@@ -3060,7 +3204,8 @@
                                                                                 isNew: false,
                                                                                 code: code,
                                                                                 accountType: req.requestType || 'student',
-                                                                                registrationDate: new Date().toISOString()
+                                                                                registrationDate: new Date().toISOString(),
+                                                                                enrolledCourses: [] // Empty array for enrolled courses
                                                                             };
 
                                                                             await window.rtdb.set(window.rtdb.ref(window.db, `users/${req.uid}`), userData);
@@ -3498,59 +3643,6 @@
                                     </div>
                                 )}
 
-                                {activeTab === 'datacenter' && (
-                                    <div className="space-y-6 animate-slide-up">
-                                        <div className="glass-panel p-6 flex justify-between items-center">
-                                            <h2 className="text-2xl font-bold flex items-center gap-2">
-                                                <GlassIcon name="database" size={24} /> مركز البيانات
-                                            </h2>
-                                            <div className="bg-white/5 px-4 py-2 rounded-xl text-slate-300 text-sm font-bold">
-                                                عدد الطلاب: {dataState.students.length}
-                                            </div>
-                                        </div>
-
-                                        <div className="glass-panel overflow-hidden">
-                                            <div className="overflow-x-auto">
-                                                <table className="w-full text-right min-w-[1000px]">
-                                                    <thead className="bg-white/5 text-slate-300">
-                                                        <tr>
-                                                            <th className="p-4">UID</th>
-                                                            <th className="p-4">الاسم</th>
-                                                            <th className="p-4">البريد الإلكتروني</th>
-                                                            <th className="p-4">الهاتف</th>
-                                                            <th className="p-4">ولي الأمر</th>
-                                                            <th className="p-4">المحافظة</th>
-                                                            <th className="p-4">الصف</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="divide-y divide-white/5">
-                                                        {dataState.students.filter(s => !['admin', 'boss'].includes(s.role)).map(student => (
-                                                            <tr key={student.id} className="hover:bg-white/5 transition">
-                                                                <td className="p-4 font-mono text-xs text-slate-500">{student.uid.slice(0, 8)}...</td>
-                                                                <td className="p-4 font-bold">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <img src={student.photo} className="w-8 h-8 rounded-full" />
-                                                                        {student.name}
-                                                                    </div>
-                                                                </td>
-                                                                <td className="p-4 text-sm">{student.email}</td>
-                                                                <td className="p-4 text-sm">{student.phone || '-'}</td>
-                                                                <td className="p-4 text-sm">{student.parentPhone || '-'}</td>
-                                                                <td className="p-4 text-sm">{student.governorate || '-'}</td>
-                                                                <td className="p-4">
-                                                                    <span className="bg-brand-accent/10 text-brand-accent px-2 py-1 rounded text-xs font-bold">
-                                                                        {student.grade === '1sec' ? '1ث' : student.grade === '2sec' ? '2ث' : '3ث'}
-                                                                    </span>
-                                                                </td>
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
                                 {activeTab === 'attendance' && (
                                     <AttendanceTable
                                         students={dataState.students}
@@ -3620,12 +3712,17 @@
                             </div>
                         )}
 
-                        {/* ✅ Course Purchase Modal */}
                         {selectedCourse && (
                             <CoursePurchaseModal 
                                 course={selectedCourse} 
                                 onClose={() => setSelectedCourse(null)} 
                                 teacherNumber={CONTACT_INFO.vodafoneNumber} 
+                                user={user}
+                                onRequireLogin={() => {
+                                    setSelectedCourse(null);
+                                    showNotification('يجب تسجيل الدخول أو إنشاء حساب أولاً لإتمام الاشتراك', 'info');
+                                    setShowLoginModal(true);
+                                }}
                             />
                         )}
                     </div>
