@@ -54,11 +54,13 @@
                         'float': 'float 6s ease-in-out infinite',
                         'slide-up': 'slideUp 0.8s ease-out',
                         'flip': 'flip 0.6s ease-in-out',
+                        'scale-in': 'scaleIn 0.3s ease-out',
                     },
                     keyframes: {
                         float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
                         slideUp: { '0%': { transform: 'translateY(30px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
                         flip: { '0%': { transform: 'rotateY(0deg)' }, '100%': { transform: 'rotateY(180deg)' } },
+                        scaleIn: { '0%': { transform: 'scale(0.9)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } },
                     }
                 }
             }
@@ -620,8 +622,8 @@
             );
         };
 
-        // ✅ Courses Catalog Component
-        const CoursesCatalog = ({ courses }) => {
+        // ✅ Courses Catalog Component - FIXED: Now accepts onSelect prop and has larger images
+        const CoursesCatalog = ({ courses, onSelect }) => {
             return (
                 <div className="glass-panel p-6 animate-slide-up">
                     <div className="flex items-center gap-3 mb-6">
@@ -636,23 +638,99 @@
 
                     <div className="grid md:grid-cols-3 gap-4">
                         {courses.map((course, index) => (
-                            <div key={course.id || index} className="bg-white/5 rounded-xl border border-white/10 overflow-hidden hover:scale-105 transition-transform duration-300">
-                                <div className="h-32 bg-slate-800 relative">
+                            <div 
+                                key={course.id || index} 
+                                onClick={() => onSelect && onSelect(course)}
+                                className="bg-white/5 rounded-xl border border-white/10 overflow-hidden hover:scale-105 transition-transform duration-300 cursor-pointer min-h-[400px] flex flex-col"
+                            >
+                                <div className="h-48 bg-slate-800 relative">
                                     <img src={course.image || 'https://via.placeholder.com/300x150?text=Course'} className="w-full h-full object-cover opacity-60" />
                                     <span className="absolute top-2 right-2 bg-brand-accent/20 text-brand-accent px-2 py-1 rounded-lg text-xs font-bold border border-brand-accent/30">
                                         {course.grade === '1sec' ? 'أولى ثانوي' : course.grade === '2sec' ? 'تانية ثانوي' : 'تالتة ثانوي'}
                                     </span>
                                 </div>
-                                <div className="p-4">
-                                    <h3 className="font-bold text-lg mb-1 line-clamp-1">{course.title}</h3>
-                                    <p className="text-xs text-slate-400 mb-3 line-clamp-2">{course.description}</p>
-                                    <div className="flex justify-between items-center">
+                                <div className="p-4 flex-1 flex flex-col justify-between">
+                                    <div>
+                                        <h3 className="font-bold text-lg mb-1 line-clamp-1">{course.title}</h3>
+                                        <p className="text-xs text-slate-400 mb-3 line-clamp-2">{course.description}</p>
+                                    </div>
+                                    <div className="flex justify-between items-center mt-auto">
                                         <span className="text-2xl font-black text-brand-accent">{course.price} <span className="text-xs text-slate-500">ج.م</span></span>
                                         <span className="text-xs text-slate-500">{course.duration} يوم</span>
                                     </div>
                                 </div>
                             </div>
                         ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // ✅ NEW: Course Purchase Modal Component (3 Steps)
+        const CoursePurchaseModal = ({ course, onClose, teacherNumber }) => {
+            const [step, setStep] = useState(1); // 1: Details, 2: Warning, 3: Payment
+
+            if (!course) return null;
+
+            return (
+                <div className="fixed inset-0 bg-black/90 z-[300] flex items-center justify-center p-4 backdrop-blur-sm" onClick={onClose}>
+                    <div className="glass-panel p-6 w-full max-w-lg relative animate-scale-in" onClick={e => e.stopPropagation()}>
+                        <button onClick={onClose} className="absolute top-4 left-4 p-2 hover:bg-white/10 rounded-full"><Icon name="x" /></button>
+
+                        {/* Step 1: Course Details */}
+                        {step === 1 && (
+                            <div className="space-y-4">
+                                <img src={course.image} className="w-full h-48 object-cover rounded-xl" />
+                                <h2 className="text-2xl font-bold text-brand-accent">{course.title}</h2>
+                                <p className="text-slate-300 leading-relaxed">{course.description}</p>
+                                <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl">
+                                    <span className="text-xl font-bold">{course.price} ج.م</span>
+                                    <span className="text-sm text-slate-400">{course.duration} يوم</span>
+                                </div>
+                                <button onClick={() => setStep(2)} className="btn-main w-full py-3 rounded-xl font-bold">اشترك الآن</button>
+                            </div>
+                        )}
+
+                        {/* Step 2: Warning */}
+                        {step === 2 && (
+                            <div className="text-center space-y-6 py-4">
+                                <div className="w-20 h-20 bg-yellow-500/20 text-yellow-500 rounded-full flex items-center justify-center mx-auto animate-pulse">
+                                    <Icon name="alert-triangle" size={40} />
+                                </div>
+                                <h3 className="text-2xl font-bold text-white">لحظة واحدة! ✋</h3>
+                                <p className="text-slate-300 text-lg">هل أنت متأكد من اختيارك لهذا الكورس؟<br/>تأكد من الصف الدراسي والمحتوى قبل الدفع.</p>
+                                <div className="flex gap-3">
+                                    <button onClick={() => setStep(1)} className="flex-1 py-3 bg-white/10 rounded-xl font-bold">رجوع</button>
+                                    <button onClick={() => setStep(3)} className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold">متأكد، متابعة</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 3: Payment */}
+                        {step === 3 && (
+                            <div className="space-y-6">
+                                <div className="text-center">
+                                    <h3 className="text-2xl font-bold text-green-400 mb-2">تفاصيل الدفع</h3>
+                                    <p className="text-slate-400">حول المبلغ المطلوب لفودافون كاش لتفعيل الكورس</p>
+                                </div>
+                                
+                                <div className="bg-white/5 p-4 rounded-xl border border-white/10 text-center">
+                                    <p className="text-sm mb-2">المبلغ المطلوب</p>
+                                    <p className="text-3xl font-black text-brand-accent">{course.price} ج.م</p>
+                                </div>
+
+                                <div className="bg-red-600/10 p-4 rounded-xl border border-red-600/30 text-center">
+                                    <p className="text-sm mb-2">رقم فودافون كاش</p>
+                                    <p className="text-2xl font-black text-white select-all cursor-pointer">{teacherNumber}</p>
+                                </div>
+
+                                <a href={`https://wa.me/201000000000?text=أريد الاشتراك في كورس: ${course.title} - السعر: ${course.price}`} 
+                                   target="_blank" 
+                                   className="flex items-center justify-center gap-2 w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition">
+                                    <Icon name="message-circle" /> إرسال الإيصال وتأكيد الحجز
+                                </a>
+                            </div>
+                        )}
                     </div>
                 </div>
             );
@@ -1629,13 +1707,14 @@
             </div>
         );
 
+        // ✅ FIXED: ThemeToggle with proper RTL handling (using justify instead of translate)
         const ThemeToggle = ({ isDark, onToggle }) => (
             <button
                 onClick={() => onToggle(!isDark)}
-                className={`relative w-16 h-8 rounded-full transition-colors duration-300 flex items-center px-1 ${isDark ? 'bg-slate-700' : 'bg-blue-300'}`}
+                className={`relative w-16 h-8 rounded-full transition-colors duration-300 flex items-center px-1 ${isDark ? 'bg-slate-700 justify-end' : 'bg-blue-300 justify-start'}`}
             >
-                <div className={`w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 flex items-center justify-center ${isDark ? 'translate-x-0 bg-black text-white' : 'translate-x-8 bg-white text-yellow-500'}`}>
-                    <Icon name={isDark ? "moon" : "sun"} size={14} />
+                <div className="w-6 h-6 rounded-full shadow-md bg-white text-yellow-500 flex items-center justify-center transform transition-transform">
+                    <Icon name={isDark ? "moon" : "sun"} size={14} className={isDark ? "text-slate-800" : "text-yellow-500"} />
                 </div>
             </button>
         );
@@ -1681,6 +1760,8 @@
             const [showExamBuilder, setShowExamBuilder] = useState(false);
             // ✅ New State for Login Modal
             const [showLoginModal, setShowLoginModal] = useState(false);
+            // ✅ New State for Selected Course (Purchase Modal)
+            const [selectedCourse, setSelectedCourse] = useState(null);
 
             useEffect(() => {
                 document.body.classList.toggle('light-mode', !isDarkMode);
@@ -1995,7 +2076,7 @@
                 }
             };
 
-            // 🎨 LANDING PAGE
+            // 🎨 LANDING PAGE - FIXED: Removed subscription button from header
             if (view === 'landing') return (
                 <div className={`min-h-screen text-white relative overflow-hidden math-grid flex flex-col ${isDarkMode ? 'bg-brand-dark' : 'bg-slate-50 text-slate-900'}`}>
                     <div className="absolute top-0 left-0 w-full h-full hero-glow z-0"></div>
@@ -2013,7 +2094,7 @@
 
                             <div className="flex items-center gap-2 md:gap-4 shrink-0">
                                 <ThemeToggle isDark={isDarkMode} onToggle={setIsDarkMode} />
-                                {/* ✅ Updated Button to open Modal */}
+                                {/* ✅ Updated Button to open Modal - Removed subscription button */}
                                 <button 
                                     onClick={() => setShowLoginModal(true)} 
                                     className="bg-white text-black hover:bg-slate-200 px-6 py-2 rounded-full font-bold transition flex items-center gap-2 shadow-lg"
@@ -2057,9 +2138,7 @@
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center md:justify-start pt-2 md:pt-4">
-                                <button onClick={handleGoogleLogin} className="btn-main px-6 py-3 md:px-8 md:py-4 rounded-xl text-base md:text-xl flex items-center justify-center gap-2 w-full sm:w-auto">
-                                    اشترك الآن <GlassIcon name="book-open" size={20} />
-                                </button>
+                                {/* Removed subscription button */}
                             </div>
                         </div>
 
@@ -2092,7 +2171,7 @@
 
                     <section className={`py-16 relative z-20 ${isDarkMode ? '' : 'bg-slate-100'}`}>
                         <div className="container mx-auto px-4 max-w-6xl">
-                            <CoursesCatalog courses={dataState.courses} />
+                            <CoursesCatalog courses={dataState.courses} onSelect={(course) => setSelectedCourse(course)} />
                         </div>
                     </section>
 
@@ -2148,6 +2227,15 @@
                                 </div>
                             </div>
                         </div>
+                    )}
+
+                    {/* ✅ Course Purchase Modal */}
+                    {selectedCourse && (
+                        <CoursePurchaseModal 
+                            course={selectedCourse} 
+                            onClose={() => setSelectedCourse(null)} 
+                            teacherNumber={CONTACT_INFO.vodafoneNumber} 
+                        />
                     )}
                 </div>
             );
@@ -2476,6 +2564,33 @@
                                                     </div>
                                                 </div>
 
+                                                {/* ✅ FIXED: Show message if not subscribed */}
+                                                <div className="glass-panel p-6">
+                                                    <h3 className="text-2xl font-bold flex items-center gap-2 mb-4"><Icon name="check-circle"/> كورساتي المشترك فيها</h3>
+                                                    
+                                                    {user?.isPaid && daysLeft > 0 && enrolledCourses.length > 0 ? (
+                                                        <div className="grid md:grid-cols-2 gap-4">
+                                                            {enrolledCourses.map(c => (
+                                                                <button key={c.id} onClick={() => { 
+                                                                    setActiveTab('lectures');
+                                                                }} className="glass-panel p-6 text-right hover:border-brand-accent transition">
+                                                                    <h4 className="font-bold text-xl">{c.title}</h4>
+                                                                    <p className="text-sm text-slate-400">اضغط للمشاهدة</p>
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="glass-panel p-10 text-center border border-dashed border-slate-600">
+                                                            <GlassIcon name="frown" size={48} className="mx-auto mb-4 grayscale" />
+                                                            <h3 className="text-xl font-bold mb-2">أنت غير مشترك في أي كورس حالياً</h3>
+                                                            <p className="text-slate-400 mb-6">تصفح الكورسات المتاحة وابدأ رحلة التفوق</p>
+                                                            <button onClick={() => setActiveTab('subscription')} className="btn-main px-8 py-3 rounded-xl">
+                                                                تصفح الكورسات المتاحة
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+
                                                 <HonorBoard students={dataState.students} isDarkMode={isDarkMode} />
 
                                                 {user?.notes && (
@@ -2706,6 +2821,15 @@
                                 )}
                             </main>
                         </div>
+
+                        {/* ✅ Course Purchase Modal */}
+                        {selectedCourse && (
+                            <CoursePurchaseModal 
+                                course={selectedCourse} 
+                                onClose={() => setSelectedCourse(null)} 
+                                teacherNumber={CONTACT_INFO.vodafoneNumber} 
+                            />
+                        )}
                     </div>
                 );
             }
@@ -3494,6 +3618,15 @@
                                     <button onClick={() => setShowStudentModal(false)} className="mt-6 w-full py-3 bg-white/10 rounded-xl font-bold">إغلاق</button>
                                 </div>
                             </div>
+                        )}
+
+                        {/* ✅ Course Purchase Modal */}
+                        {selectedCourse && (
+                            <CoursePurchaseModal 
+                                course={selectedCourse} 
+                                onClose={() => setSelectedCourse(null)} 
+                                teacherNumber={CONTACT_INFO.vodafoneNumber} 
+                            />
                         )}
                     </div>
                 );
