@@ -11,12 +11,19 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Plyr CSS and JS -->
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+    
+    <!-- HLS.js for better streaming support -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, get, child, push, update, onValue, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, signInWithPhoneNumber, RecaptchaVerifier } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
+        
         const firebaseConfig = {
             apiKey: 'AIzaSyDZ9y1XLS0wMR0kKdEOO91utF7-5p9vp_M',
             authDomain: 'sabeel-platform-official.firebaseapp.com',
@@ -27,7 +34,7 @@
             measurementId: 'G-65HE8PB0XT',
             databaseURL: 'https://sabeel-platform-official-default-rtdb.asia-southeast1.firebasedatabase.app'
         };
-
+        
         const app = initializeApp(firebaseConfig);
         window.db = getDatabase(app);
         window.auth = getAuth(app);
@@ -47,6 +54,8 @@
                             card: '#171717',
                             primary: '#a1a1aa',
                             accent: '#e4e4e7',
+                            red: '#8b0000',
+                            gold: '#d4af37',
                         }
                     },
                     fontFamily: { 'cairo': ['Cairo', 'sans-serif'] },
@@ -76,6 +85,11 @@
             --text-secondary: #a1a1aa;
             --grid-color: rgba(255, 255, 255, 0.04);
             --glow-color: rgba(228, 228, 231, 0.12);
+            
+            /* Plyr custom colors */
+            --plyr-color-main: #8b0000;
+            --plyr-control-toggle-checked-background: #d4af37;
+            --plyr-video-control-background-hover: rgba(212, 175, 55, 0.3);
         }
 
         .light-mode {
@@ -142,23 +156,39 @@
             box-shadow: 0 8px 25px rgba(228, 228, 231, 0.4);
         }
 
-        .embed-wrapper {
-            position: relative;
-            padding-bottom: 56.25%;
-            height: 0;
-            overflow: hidden;
+        /* Plyr custom styles */
+        .plyr--video {
             border-radius: 12px;
-            background: #000;
+            overflow: hidden;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
-
-        .embed-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
+        
+        .plyr__controls {
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+            direction: ltr;
+        }
+        
+        .plyr__control--overlaid {
+            background: #8b0000;
+            border: 2px solid #d4af37;
+        }
+        
+        .plyr__control--overlaid:hover {
+            background: #a00000;
+        }
+        
+        .plyr__menu__container .plyr__control[role=menuitemradio][aria-checked=true]::before {
+            background: #d4af37;
+        }
+        
+        .plyr__progress__buffer {
+            background: rgba(212, 175, 55, 0.3);
+        }
+        
+        .video-container {
+            position: relative;
             width: 100%;
-            height: 100%;
-            border: 0;
+            margin: 0 auto;
         }
 
         .math-grid {
@@ -337,48 +367,146 @@
 
         .quiz-option:hover {
             transform: translateX(-5px);
-            border-color: #fbbf24;
+            border-color: #d4af37;
         }
 
         .quiz-option.selected {
-            background: rgba(251, 191, 36, 0.2);
-            border-color: #fbbf24;
+            background: rgba(212, 175, 55, 0.2);
+            border-color: #d4af37;
         }
 
         .attendance-btn {
             transition: all 0.3s ease;
         }
-
+        
         .attendance-btn:hover:not(:disabled) {
             transform: scale(1.05);
             box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
         }
-
+        
         .attendance-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-
+        
         .attendance-day {
             transition: all 0.3s ease;
         }
-
+        
         .attendance-day.present {
             background-color: rgba(34, 197, 94, 0.2);
             border-color: #22c55e;
             color: #22c55e;
         }
-
+        
         .attendance-day.absent {
             background-color: rgba(239, 68, 68, 0.2);
             border-color: #ef4444;
             color: #ef4444;
+        }
+        
+        /* WhatsApp Floating Button */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 9999;
+            background-color: #25D366;
+            color: white;
+            border-radius: 60px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid white;
+            font-weight: bold;
+        }
+        
+        .whatsapp-float:hover {
+            transform: scale(1.1) translateY(-5px);
+            box-shadow: 0 15px 35px rgba(37, 211, 102, 0.5);
+        }
+        
+        .whatsapp-float .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(37, 211, 102, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+            }
+        }
+        
+        /* Video player container */
+        .plyr-container {
+            position: relative;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .custom-video-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+        
+        .custom-control-btn {
+            background: #8b0000;
+            color: white;
+            border: 2px solid #d4af37;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .custom-control-btn:hover {
+            background: #a00000;
+            transform: scale(1.05);
+        }
+        
+        /* Exam result styles */
+        .exam-result {
+            border: 2px solid #d4af37;
+            background: rgba(139, 0, 0, 0.1);
+        }
+        
+        .correct-answer {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: #22c55e;
+        }
+        
+        .wrong-answer {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
         }
     </style>
 </head>
 
 <body>
     <div id="root"></div>
+    
+    <!-- WhatsApp Floating Button - ثابت في كل الصفحات -->
+    <div class="whatsapp-float pulse" onclick="window.open('https://wa.me/201000000000?text=السلام عليكم، أحتاج مساعدة في منصة سبيل التفوق', '_blank')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        <span>الدعم الفني</span>
+    </div>
+    
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
@@ -416,6 +544,127 @@
                 <Icon name={name} size={size} />
             </div>
         );
+
+        // ✅ New Plyr Video Player Component
+        const PlyrVideoPlayer = ({ src, title = "فيديو" }) => {
+            const videoRef = useRef(null);
+            const playerRef = useRef(null);
+            const containerRef = useRef(null);
+            
+            useEffect(() => {
+                if (!videoRef.current) return;
+                
+                // تنظيف المشغل القديم
+                if (playerRef.current) {
+                    playerRef.current.destroy();
+                }
+                
+                // تحويل الرابط إذا كان YouTube
+                let videoSrc = src;
+                let isYouTube = false;
+                
+                if (src.includes('youtube.com/watch') || src.includes('youtu.be') || src.includes('youtube.com/embed')) {
+                    // استخراج YouTube ID
+                    let videoId = '';
+                    if (src.includes('youtube.com/watch')) {
+                        const urlParams = new URLSearchParams(new URL(src).search);
+                        videoId = urlParams.get('v');
+                    } else if (src.includes('youtu.be')) {
+                        videoId = src.split('/').pop().split('?')[0];
+                    } else if (src.includes('youtube.com/embed')) {
+                        videoId = src.split('/').pop().split('?')[0];
+                    }
+                    
+                    if (videoId) {
+                        videoSrc = `https://www.youtube.com/watch?v=${videoId}`;
+                        isYouTube = true;
+                    }
+                }
+                
+                // إنشاء مشغل Plyr
+                const player = new Plyr(videoRef.current, {
+                    controls: [
+                        'play-large',
+                        'play',
+                        'rewind', // ترجيع 10 ثواني
+                        'fast-forward', // تقديم 10 ثواني
+                        'progress',
+                        'current-time',
+                        'duration',
+                        'mute',
+                        'volume',
+                        'captions',
+                        'settings',
+                        'fullscreen'
+                    ],
+                    settings: ['captions', 'quality', 'speed'],
+                    speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2] },
+                    quality: { default: 720, options: [4320, 2880, 2160, 1440, 1080, 720, 576, 480, 360, 240] },
+                    i18n: {
+                        rewind: 'رجوع ١٠ ثواني',
+                        fastForward: 'تقديم ١٠ ثواني',
+                        play: 'تشغيل',
+                        pause: 'إيقاف',
+                        volume: 'مستوى الصوت',
+                        mute: 'كتم الصوت',
+                        unmute: 'إلغاء كتم الصوت',
+                        enterFullscreen: 'ملء الشاشة',
+                        exitFullscreen: 'خروج من ملء الشاشة',
+                        settings: 'الإعدادات',
+                    }
+                });
+                
+                playerRef.current = player;
+                
+                return () => {
+                    if (playerRef.current) {
+                        playerRef.current.destroy();
+                    }
+                };
+            }, [src]);
+            
+            // دالة تقديم 5 ثواني
+            const skipForward = () => {
+                if (playerRef.current) {
+                    const currentTime = playerRef.current.currentTime;
+                    playerRef.current.currentTime = currentTime + 5;
+                }
+            };
+            
+            // دالة ترجيع 5 ثواني
+            const skipBackward = () => {
+                if (playerRef.current) {
+                    const currentTime = playerRef.current.currentTime;
+                    playerRef.current.currentTime = currentTime - 5;
+                }
+            };
+            
+            return (
+                <div className="plyr-container" ref={containerRef}>
+                    <video
+                        ref={videoRef}
+                        className="plyr"
+                        playsInline
+                        controls
+                        crossOrigin="anonymous"
+                    >
+                        <source src={src} type="video/mp4" />
+                        <source src={src.replace('.mp4', '.webm')} type="video/webm" />
+                        <a href={src} download>تحميل الفيديو</a>
+                    </video>
+                    
+                    {/* أزرار التحكم المخصصة - 5 ثواني */}
+                    <div className="custom-video-controls">
+                        <button onClick={skipBackward} className="custom-control-btn">
+                            <Icon name="rotate-ccw" size={16} /> -٥ ثواني
+                        </button>
+                        <button onClick={skipForward} className="custom-control-btn">
+                            +٥ ثواني <Icon name="rotate-cw" size={16} />
+                        </button>
+                    </div>
+                </div>
+            );
+        };
 
         // ✅ Phone Login Component
         const PhoneLoginModal = ({ onClose, onLoginSuccess }) => {
@@ -665,8 +914,8 @@
 
                     <div className="grid md:grid-cols-3 gap-4">
                         {courses.map((course, index) => (
-                            <div
-                                key={course.id || index}
+                            <div 
+                                key={course.id || index} 
                                 onClick={() => onSelect && onSelect(course)}
                                 className="bg-white/5 rounded-xl border border-white/10 overflow-hidden hover:scale-105 transition-transform duration-300 cursor-pointer min-h-[400px] flex flex-col"
                             >
@@ -693,7 +942,7 @@
             );
         };
 
-        // ✅ NEW: Course Purchase Modal Component (with login check and student code)
+        // ✅ NEW: Course Purchase Modal Component
         const CoursePurchaseModal = ({ course, onClose, teacherNumber, user, onRequireLogin }) => {
             const [step, setStep] = useState(1); // 1: Details, 2: Warning, 3: Payment
 
@@ -720,7 +969,7 @@
                                         <h2 className="text-2xl font-bold text-white">{course.title}</h2>
                                     </div>
                                 </div>
-
+                                
                                 <div className="space-y-4">
                                     <div className="bg-white/5 p-4 rounded-xl">
                                         <h3 className="font-bold text-brand-accent mb-2">مميزات الكورس:</h3>
@@ -742,7 +991,7 @@
                                 </div>
                                 <div>
                                     <h3 className="text-2xl font-bold text-white mb-2">تأكيد الاختيار</h3>
-                                    <p className="text-slate-300">هل أنت متأكد من رغبتك في الاشتراك في كورس<br /><span className="text-brand-accent font-bold">"{course.title}"</span>؟</p>
+                                    <p className="text-slate-300">هل أنت متأكد من رغبتك في الاشتراك في كورس<br/><span className="text-brand-accent font-bold">"{course.title}"</span>؟</p>
                                 </div>
                                 <div className="flex gap-4">
                                     <button onClick={() => setStep(1)} className="flex-1 py-3 bg-white/10 rounded-xl font-bold hover:bg-white/20">تراجع</button>
@@ -757,7 +1006,7 @@
                                     <h3 className="text-xl font-bold text-green-400 mb-1">بيانات الدفع</h3>
                                     <p className="text-xs text-slate-400">حول المبلغ المطلوب ثم أرسل صورة الإيصال</p>
                                 </div>
-
+                                
                                 <div className="bg-white/5 p-6 rounded-xl space-y-4">
                                     <div className="flex justify-between items-center">
                                         <span className="text-slate-400">المبلغ المطلوب:</span>
@@ -778,9 +1027,9 @@
                                     <p>بعد التحويل، اضغط الزر بالأسفل لإرسال الإيصال مع كود الطالب واسم الكورس عبر واتساب وسيتم تفعيل اشتراكك فوراً.</p>
                                 </div>
 
-                                <a href={`https://wa.me/201000000000?text=السلام عليكم، قمت بتحويل مبلغ ${course.price} جنيه للاشتراك في كورس "${course.title}".%0Aكود الطالب: ${user?.code || 'غير متوفر'}%0Aالرجاء تفعيل الاشتراك`}
-                                    target="_blank"
-                                    className="flex items-center justify-center gap-2 w-full py-4 bg-[#25D366] hover:bg-[#1ebd59] text-white rounded-xl font-bold transition shadow-lg shadow-green-900/20">
+                                <a href={`https://wa.me/201000000000?text=السلام عليكم، قمت بتحويل مبلغ ${course.price} جنيه للاشتراك في كورس "${course.title}".%0Aكود الطالب: ${user?.code || 'غير متوفر'}%0Aالرجاء تفعيل الاشتراك`} 
+                                   target="_blank" 
+                                   className="flex items-center justify-center gap-2 w-full py-4 bg-[#25D366] hover:bg-[#1ebd59] text-white rounded-xl font-bold transition shadow-lg shadow-green-900/20">
                                     <Icon name="message-circle" /> إرسال الإيصال وتأكيد الحجز
                                 </a>
                             </div>
@@ -811,7 +1060,7 @@
                             <GlassIcon name="book-open" size={48} className="mx-auto mb-4 opacity-50" />
                             <h3 className="text-lg font-bold mb-2">لا توجد كورسات مفعلة</h3>
                             <p className="text-sm text-slate-400 mb-6">لم تقم بالاشتراك في أي كورس بعد</p>
-                            <button
+                            <button 
                                 onClick={onBackToHome}
                                 className="btn-main px-6 py-3 rounded-xl font-bold inline-flex items-center gap-2"
                             >
@@ -837,7 +1086,7 @@
                                             <span className="text-xs bg-white/10 px-2 py-1 rounded">
                                                 {course.grade === '1sec' ? 'أولى ثانوي' : course.grade === '2sec' ? 'تانية ثانوي' : 'تالتة ثانوي'}
                                             </span>
-                                            <button
+                                            <button 
                                                 onClick={() => window.location.href = '#lectures'}
                                                 className="bg-green-600/20 hover:bg-green-600 text-green-400 hover:text-white px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1"
                                             >
@@ -851,7 +1100,7 @@
                     )}
 
                     <div className="mt-6 text-center border-t border-white/10 pt-6">
-                        <button
+                        <button 
                             onClick={onBackToHome}
                             className="bg-brand-primary/20 hover:bg-brand-primary text-brand-accent hover:text-white px-6 py-3 rounded-xl font-bold transition inline-flex items-center gap-2"
                         >
@@ -862,15 +1111,15 @@
             );
         };
 
-        // ✅ FIXED: Enhanced Attendance Tracker Component
+        // ✅ NEW: Enhanced Attendance Tracker Component
         const EnhancedAttendanceTracker = ({ attendance, studentId, onMarkAttendance }) => {
             const [todayMarked, setTodayMarked] = useState(false);
             const [loading, setLoading] = useState(false);
-
+            
             const today = new Date().toISOString().split('T')[0];
             const studentAttendance = attendance[studentId] || {};
             const todayRecord = studentAttendance[today];
-
+            
             // الحصول على آخر 7 أيام مع حالتها
             const last7Days = [];
             for (let i = 6; i >= 0; i--) {
@@ -885,12 +1134,12 @@
                     status: record?.status || null
                 });
             }
-
+            
             // حساب الإحصائيات
             const totalDays = Object.keys(studentAttendance).length;
-            const presentDays = Object.values(studentAttendance).filter(r => r?.status === 'present').length;
+            const presentDays = Object.values(studentAttendance).filter(r => r.status === 'present').length;
             const attendanceRate = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0;
-
+            
             const handleMarkAttendance = async () => {
                 if (todayRecord || loading) return;
                 setLoading(true);
@@ -903,7 +1152,7 @@
                     setLoading(false);
                 }
             };
-
+            
             useEffect(() => {
                 if (todayRecord) {
                     setTodayMarked(true);
@@ -929,10 +1178,11 @@
                         <button
                             onClick={handleMarkAttendance}
                             disabled={todayMarked || loading}
-                            className={`attendance-btn px-8 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-3 mx-auto transition-all ${todayMarked
-                                ? 'bg-green-600 text-white cursor-not-allowed'
-                                : 'btn-main hover:scale-105'
-                                }`}
+                            className={`attendance-btn px-8 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-3 mx-auto transition-all ${
+                                todayMarked 
+                                    ? 'bg-green-600 text-white cursor-not-allowed' 
+                                    : 'btn-main hover:scale-105'
+                            }`}
                         >
                             {todayMarked ? (
                                 <>
@@ -945,8 +1195,8 @@
                             )}
                         </button>
                         <p className="text-xs text-slate-400 mt-3">
-                            {todayMarked
-                                ? 'شكراً لك! سيتم تحديث الحضور غداً'
+                            {todayMarked 
+                                ? 'شكراً لك! سيتم تحديث الحضور غداً' 
                                 : 'يمكنك تسجيل الحضور مرة واحدة فقط يومياً'
                             }
                         </p>
@@ -960,12 +1210,13 @@
                         <div className="grid grid-cols-7 gap-2">
                             {last7Days.map(day => (
                                 <div key={day.date} className="text-center">
-                                    <div className={`attendance-day w-10 h-10 rounded-full mx-auto flex items-center justify-center text-sm font-bold border-2 ${day.status === 'present'
-                                        ? 'present'
-                                        : day.status === 'absent'
-                                            ? 'absent'
-                                            : 'border-white/10 bg-white/5 text-slate-500'
-                                        }`}>
+                                    <div className={`attendance-day w-10 h-10 rounded-full mx-auto flex items-center justify-center text-sm font-bold border-2 ${
+                                        day.status === 'present' 
+                                            ? 'present' 
+                                            : day.status === 'absent' 
+                                                ? 'absent' 
+                                                : 'border-white/10 bg-white/5 text-slate-500'
+                                    }`}>
                                         {day.status === 'present' ? '✓' : day.status === 'absent' ? '✗' : '-'}
                                     </div>
                                     <span className="text-xs text-slate-400 mt-1 block">{day.dayMonth}</span>
@@ -981,8 +1232,8 @@
                             <span className="text-lg font-black text-green-400">{attendanceRate}%</span>
                         </div>
                         <div className="h-2 bg-white/10 rounded-full overflow-hidden mb-3">
-                            <div
-                                className="h-full bg-green-500 rounded-full transition-all duration-500"
+                            <div 
+                                className="h-full bg-green-500 rounded-full transition-all duration-500" 
                                 style={{ width: `${attendanceRate}%` }}
                             ></div>
                         </div>
@@ -1040,7 +1291,7 @@
                         <div className="space-y-4 mb-6">
                             <div>
                                 <label className="block text-sm font-bold mb-2">اختر الكورس للتفعيل</label>
-                                <select
+                                <select 
                                     value={selectedCourse}
                                     onChange={e => setSelectedCourse(e.target.value)}
                                     className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none"
@@ -1056,7 +1307,7 @@
 
                             <div>
                                 <label className="block text-sm font-bold mb-2">مدة الاشتراك (أيام)</label>
-                                <input
+                                <input 
                                     type="number"
                                     value={days}
                                     onChange={e => setDays(parseInt(e.target.value) || 30)}
@@ -1068,13 +1319,13 @@
                         </div>
 
                         <div className="flex gap-3">
-                            <button
+                            <button 
                                 onClick={onClose}
                                 className="flex-1 py-4 bg-white/10 rounded-xl font-bold hover:bg-white/20 transition"
                             >
                                 إلغاء
                             </button>
-                            <button
+                            <button 
                                 onClick={handleActivate}
                                 disabled={loading || !selectedCourse}
                                 className="flex-1 btn-main py-4 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1103,20 +1354,20 @@
             const handleActivateSubscription = async (studentId, courseId, days) => {
                 const endDate = new Date();
                 endDate.setDate(endDate.getDate() + days);
-
+                
                 const student = students.find(s => s.id === studentId);
                 const currentEnrolled = student?.enrolledCourses || [];
-
+                
                 if (!currentEnrolled.includes(courseId)) {
                     const updatedEnrolled = [...currentEnrolled, courseId];
-
+                    
                     await window.rtdb.update(window.rtdb.ref(window.db, `users/${studentId}`), {
                         isPaid: true,
                         enrolledCourses: updatedEnrolled,
                         subscriptionEnd: endDate.toISOString(),
                         subscriptionStart: new Date().toISOString()
                     });
-
+                    
                     onConfirmPayment(studentId, days);
                 } else {
                     alert('الطالب مشترك بالفعل في هذا الكورس');
@@ -1210,7 +1461,7 @@
                                                 </td>
                                                 <td className="p-4">
                                                     <div className="flex gap-2 flex-wrap">
-                                                        <button
+                                                        <button 
                                                             onClick={() => {
                                                                 setSelectedStudent(student);
                                                                 setShowActivationModal(true);
@@ -1219,13 +1470,13 @@
                                                         >
                                                             <Icon name="zap" size={14} /> تفعيل كورس
                                                         </button>
-
-                                                        <button
+                                                        
+                                                        <button 
                                                             onClick={() => {
                                                                 if (confirm(`هل أنت متأكد من إلغاء اشتراك ${student.name}؟`)) {
                                                                     onDeactivate(student.id);
                                                                 }
-                                                            }}
+                                                            }} 
                                                             className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-md"
                                                         >
                                                             <Icon name="x-circle" size={14} /> إلغاء الاشتراك
@@ -1303,13 +1554,29 @@
             );
         };
 
-        // 📝 Exam Builder Component
+        // ✅ NEW: Exam Builder Component with Course and Grade
         const ExamBuilder = ({ onClose, onSave, isDarkMode }) => {
             const [examMode, setExamMode] = useState(null);
             const [question, setQuestion] = useState('');
             const [options, setOptions] = useState([{ text: '', isCorrect: false }]);
             const [imageUrl, setImageUrl] = useState('');
-            const [grade, setGrade] = useState('all');
+            const [grade, setGrade] = useState('1sec');
+            const [courseId, setCourseId] = useState('');
+            const [courses, setCourses] = useState([]);
+
+            useEffect(() => {
+                // تحميل الكورسات من Firebase
+                const coursesRef = window.rtdb.ref(window.db, 'courses');
+                window.rtdb.onValue(coursesRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        const coursesData = Object.entries(snapshot.val()).map(([id, data]) => ({
+                            id,
+                            ...data
+                        }));
+                        setCourses(coursesData);
+                    }
+                });
+            }, []);
 
             const addOption = () => {
                 if (options.length < 6) {
@@ -1335,13 +1602,18 @@
             };
 
             const handleSave = () => {
-                if (!question.trim()) return;
+                if (!question.trim() || !courseId) {
+                    alert('يرجى ملء جميع الحقول المطلوبة');
+                    return;
+                }
 
                 const examData = {
                     type: examMode,
                     question,
                     grade,
-                    timestamp: Date.now()
+                    courseId,
+                    timestamp: Date.now(),
+                    date: new Date().toLocaleDateString('ar-EG')
                 };
 
                 if (examMode === 'mcq') {
@@ -1400,15 +1672,29 @@
                                     <Icon name="arrow-right" size={18} /> رجوع لاختيار النوع
                                 </button>
 
-                                <div>
-                                    <label className="block text-sm font-bold mb-2">الصف الدراسي</label>
-                                    <select value={grade} onChange={e => setGrade(e.target.value)}
-                                        className="w-full p-3 bg-white/5 border border-white/10 rounded-xl">
-                                        <option value="all">كل الصفوف</option>
-                                        <option value="1sec">أولى ثانوي</option>
-                                        <option value="2sec">تانية ثانوي</option>
-                                        <option value="3sec">تالتة ثانوي</option>
-                                    </select>
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-bold mb-2">الصف الدراسي</label>
+                                        <select value={grade} onChange={e => setGrade(e.target.value)}
+                                            className="w-full p-3 bg-white/5 border border-white/10 rounded-xl">
+                                            <option value="1sec">أولى ثانوي</option>
+                                            <option value="2sec">تانية ثانوي</option>
+                                            <option value="3sec">تالتة ثانوي</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-bold mb-2">الكورس</label>
+                                        <select value={courseId} onChange={e => setCourseId(e.target.value)}
+                                            className="w-full p-3 bg-white/5 border border-white/10 rounded-xl">
+                                            <option value="">-- اختر كورس --</option>
+                                            {courses.map(course => (
+                                                <option key={course.id} value={course.id}>
+                                                    {course.title}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div>
@@ -1475,6 +1761,462 @@
                                         حفظ الامتحان
                                     </button>
                                 </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // ✅ NEW: Exam Player Component for Students
+        const ExamPlayer = ({ exam, onClose, user, onComplete }) => {
+            const [answers, setAnswers] = useState({});
+            const [submitted, setSubmitted] = useState(false);
+            const [result, setResult] = useState(null);
+            const [showResult, setShowResult] = useState(false);
+            
+            const handleOptionSelect = (questionId, optionIndex) => {
+                if (submitted) return;
+                setAnswers({ ...answers, [questionId]: optionIndex });
+            };
+            
+            const handleEssayChange = (questionId, text) => {
+                if (submitted) return;
+                setAnswers({ ...answers, [questionId]: text });
+            };
+            
+            const handleSubmit = () => {
+                if (exam.type === 'mcq') {
+                    // تصحيح MCQ
+                    const isCorrect = answers[exam.id] === exam.correctIndex;
+                    const score = isCorrect ? 1 : 0;
+                    
+                    setResult({
+                        correct: isCorrect,
+                        score: score,
+                        total: 1,
+                        percentage: isCorrect ? 100 : 0,
+                        selectedAnswer: answers[exam.id],
+                        correctAnswer: exam.options[exam.correctIndex]?.text
+                    });
+                } else {
+                    // مقالي أو واتساب - عرض رسالة
+                    setResult({
+                        message: 'تم استلام إجابتك، سيتم تصحيحها من قبل المعلم قريباً'
+                    });
+                }
+                
+                setSubmitted(true);
+                setShowResult(true);
+                
+                // حفظ النتيجة في Firebase
+                const resultData = {
+                    examId: exam.id,
+                    studentId: user?.uid,
+                    studentName: user?.name,
+                    answers: answers,
+                    timestamp: Date.now(),
+                    date: new Date().toLocaleDateString('ar-EG')
+                };
+                
+                if (exam.type === 'mcq') {
+                    resultData.score = result?.score;
+                    resultData.correct = result?.correct;
+                }
+                
+                window.rtdb.push(window.rtdb.ref(window.db, 'examResults'), resultData);
+                
+                if (onComplete) {
+                    onComplete(resultData);
+                }
+            };
+            
+            return (
+                <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[300] flex items-center justify-center p-4" onClick={onClose}>
+                    <div className="glass-panel p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl font-bold flex items-center gap-2">
+                                <GlassIcon name="clipboard-list" size={24} />
+                                امتحان
+                            </h2>
+                            <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl">
+                                <Icon name="x" size={24} />
+                            </button>
+                        </div>
+                        
+                        {!showResult ? (
+                            <>
+                                <div className="mb-6">
+                                    <h3 className="text-xl font-bold text-brand-gold mb-2">{exam.question}</h3>
+                                    <p className="text-sm text-slate-400">نوع الامتحان: {
+                                        exam.type === 'mcq' ? 'اختيار من متعدد' : 
+                                        exam.type === 'essay' ? 'مقالي' : 'واتساب'
+                                    }</p>
+                                </div>
+                                
+                                {exam.type === 'mcq' && (
+                                    <div className="space-y-4 mb-8">
+                                        {exam.options?.map((option, idx) => (
+                                            <div 
+                                                key={idx}
+                                                onClick={() => handleOptionSelect(exam.id, idx)}
+                                                className={`quiz-option p-4 rounded-xl border-2 transition ${
+                                                    answers[exam.id] === idx 
+                                                        ? 'border-brand-gold bg-brand-gold/20' 
+                                                        : 'border-white/10 hover:border-brand-gold/50'
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                                                        answers[exam.id] === idx 
+                                                            ? 'border-brand-gold bg-brand-gold text-black' 
+                                                            : 'border-white/30'
+                                                    }`}>
+                                                        {answers[exam.id] === idx && '✓'}
+                                                    </div>
+                                                    <span>{option.text}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                
+                                {exam.type === 'essay' && (
+                                    <div className="mb-8">
+                                        <textarea
+                                            value={answers[exam.id] || ''}
+                                            onChange={(e) => handleEssayChange(exam.id, e.target.value)}
+                                            placeholder="اكتب إجابتك هنا..."
+                                            className="w-full p-4 bg-white/5 border border-white/10 rounded-xl h-40 resize-none"
+                                        />
+                                    </div>
+                                )}
+                                
+                                {exam.type === 'whatsapp' && (
+                                    <div className="mb-8 text-center">
+                                        <div className="bg-yellow-500/10 p-6 rounded-xl mb-4">
+                                            <Icon name="message-circle" size={48} className="mx-auto mb-3 text-green-500" />
+                                            <p className="mb-4">هذا السؤال يتطلب إرسال الحل عبر واتساب مع صورة إن وجدت</p>
+                                            {exam.imageUrl && (
+                                                <a href={exam.imageUrl} target="_blank" className="block mb-4">
+                                                    <img src={exam.imageUrl} className="max-h-40 mx-auto rounded-lg" />
+                                                </a>
+                                            )}
+                                        </div>
+                                        <a 
+                                            href={`https://wa.me/201000000000?text=إجابة سؤال: ${exam.question}%0Aالطالب: ${user?.name}%0Aكود الطالب: ${user?.code}`}
+                                            target="_blank"
+                                            className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold"
+                                        >
+                                            <Icon name="message-circle" /> إرسال الإجابة عبر واتساب
+                                        </a>
+                                    </div>
+                                )}
+                                
+                                <div className="flex gap-3 pt-4 border-t border-white/10">
+                                    <button onClick={onClose} className="flex-1 py-4 bg-white/10 rounded-xl font-bold">
+                                        إلغاء
+                                    </button>
+                                    <button 
+                                        onClick={handleSubmit} 
+                                        disabled={exam.type !== 'whatsapp' && !answers[exam.id]}
+                                        className="flex-1 btn-main py-4 rounded-xl font-bold disabled:opacity-50"
+                                    >
+                                        تسليم الإجابة
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="text-center space-y-6">
+                                <div className="w-24 h-24 mx-auto bg-green-500/20 rounded-full flex items-center justify-center">
+                                    <Icon name="check-circle" size={48} className="text-green-500" />
+                                </div>
+                                
+                                <h3 className="text-2xl font-bold">تم تسليم الإجابة بنجاح!</h3>
+                                
+                                {result && (
+                                    <div className="glass-panel p-6 space-y-4">
+                                        {result.correct !== undefined && (
+                                            <>
+                                                <div className="flex justify-between items-center">
+                                                    <span>النتيجة:</span>
+                                                    <span className={`text-xl font-bold ${result.correct ? 'text-green-500' : 'text-red-500'}`}>
+                                                        {result.correct ? '✓ صحيح' : '✗ خطأ'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span>الدرجة:</span>
+                                                    <span className="text-xl font-bold">{result.score} / {result.total}</span>
+                                                </div>
+                                                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                                    <div 
+                                                        className={`h-full ${result.correct ? 'bg-green-500' : 'bg-red-500'}`}
+                                                        style={{ width: `${result.percentage}%` }}
+                                                    ></div>
+                                                </div>
+                                                {result.correctAnswer && (
+                                                    <div className="bg-green-500/10 p-3 rounded-lg">
+                                                        <p className="text-sm text-green-400">الإجابة الصحيحة: {result.correctAnswer}</p>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+                                        
+                                        {result.message && (
+                                            <p className="text-slate-300">{result.message}</p>
+                                        )}
+                                    </div>
+                                )}
+                                
+                                <button onClick={onClose} className="btn-main px-8 py-3 rounded-xl font-bold">
+                                    إغلاق
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // ✅ NEW: Exams List Component for Students
+        const ExamsList = ({ exams, user, onSelectExam }) => {
+            const [filterGrade, setFilterGrade] = useState('all');
+            const [filterCourse, setFilterCourse] = useState('all');
+            const [courses, setCourses] = useState([]);
+            
+            useEffect(() => {
+                // تحميل الكورسات
+                const coursesRef = window.rtdb.ref(window.db, 'courses');
+                window.rtdb.onValue(coursesRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        const coursesData = Object.entries(snapshot.val()).map(([id, data]) => ({
+                            id,
+                            ...data
+                        }));
+                        setCourses(coursesData);
+                    }
+                });
+            }, []);
+            
+            const userEnrolledCourses = user?.enrolledCourses || [];
+            
+            // فلترة الامتحانات حسب الصف والكورسات المسجل فيها الطالب
+            const filteredExams = exams.filter(exam => {
+                if (filterGrade !== 'all' && exam.grade !== filterGrade) return false;
+                if (filterCourse !== 'all' && exam.courseId !== filterCourse) return false;
+                
+                // التحقق من أن الطالب مسجل في هذا الكورس
+                return userEnrolledCourses.includes(exam.courseId);
+            });
+            
+            return (
+                <div className="glass-panel p-6 animate-slide-up">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="glass-icon bg-red-500/20 text-red-500 border-red-500/30">
+                            <Icon name="clipboard-list" size={24} />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold">♞ الامتحانات</h2>
+                            <p className="text-xs text-slate-400">اختبر معلوماتك في الكورسات المسجل بها</p>
+                        </div>
+                    </div>
+                    
+                    {/* فلترة */}
+                    <div className="flex flex-wrap gap-4 mb-6">
+                        <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
+                            {['all', '1sec', '2sec', '3sec'].map(g => (
+                                <button
+                                    key={g}
+                                    onClick={() => setFilterGrade(g)}
+                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition ${
+                                        filterGrade === g 
+                                            ? 'bg-brand-primary text-white shadow-lg' 
+                                            : 'text-slate-400 hover:text-white'
+                                    }`}
+                                >
+                                    {g === 'all' ? 'الكل' : g === '1sec' ? 'أولى' : g === '2sec' ? 'تانية' : 'تالتة'}
+                                </button>
+                            ))}
+                        </div>
+                        
+                        <select 
+                            value={filterCourse}
+                            onChange={(e) => setFilterCourse(e.target.value)}
+                            className="bg-white/5 border border-white/10 p-2 rounded-xl text-sm"
+                        >
+                            <option value="all">كل الكورسات</option>
+                            {courses.filter(c => userEnrolledCourses.includes(c.id)).map(course => (
+                                <option key={course.id} value={course.id}>{course.title}</option>
+                            ))}
+                        </select>
+                    </div>
+                    
+                    {filteredExams.length === 0 ? (
+                        <div className="text-center py-12 border border-dashed border-white/10 rounded-xl">
+                            <GlassIcon name="clipboard" size={48} className="mx-auto mb-4 opacity-50" />
+                            <h3 className="text-lg font-bold mb-2">لا توجد امتحانات متاحة</h3>
+                            <p className="text-sm text-slate-400">ليس لديك امتحانات في هذه التصفية</p>
+                        </div>
+                    ) : (
+                        <div className="grid md:grid-cols-2 gap-4">
+                            {filteredExams.map(exam => {
+                                const course = courses.find(c => c.id === exam.courseId);
+                                return (
+                                    <div 
+                                        key={exam.id} 
+                                        onClick={() => onSelectExam(exam)}
+                                        className="bg-white/5 rounded-xl border border-white/10 overflow-hidden hover:border-red-500/50 hover:scale-[1.02] transition-all duration-300 cursor-pointer"
+                                    >
+                                        <div className="p-5">
+                                            <div className="flex items-start justify-between mb-3">
+                                                <span className={`px-2 py-1 rounded text-xs font-bold ${
+                                                    exam.type === 'mcq' ? 'bg-blue-500/20 text-blue-300' :
+                                                    exam.type === 'essay' ? 'bg-purple-500/20 text-purple-300' :
+                                                    'bg-green-500/20 text-green-300'
+                                                }`}>
+                                                    {exam.type === 'mcq' ? 'اختياري' : exam.type === 'essay' ? 'مقالي' : 'واتساب'}
+                                                </span>
+                                                <span className="text-xs text-slate-400">{exam.date}</span>
+                                            </div>
+                                            
+                                            <h3 className="font-bold text-lg mb-2 line-clamp-2">{exam.question}</h3>
+                                            
+                                            {course && (
+                                                <div className="flex items-center gap-2 mt-3">
+                                                    <span className="text-xs bg-white/10 px-2 py-1 rounded">
+                                                        {course.title}
+                                                    </span>
+                                                    <span className="text-xs bg-white/10 px-2 py-1 rounded">
+                                                        {exam.grade === '1sec' ? 'أولى' : exam.grade === '2sec' ? 'تانية' : 'تالتة'}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // ✅ NEW: Results Page Component
+        const ResultsPage = ({ user, exams }) => {
+            const [results, setResults] = useState([]);
+            const [courses, setCourses] = useState([]);
+            
+            useEffect(() => {
+                // تحميل نتائج الطالب
+                const resultsRef = window.rtdb.ref(window.db, 'examResults');
+                window.rtdb.onValue(resultsRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        const resultsData = Object.entries(snapshot.val())
+                            .map(([id, data]) => ({ id, ...data }))
+                            .filter(r => r.studentId === user?.uid)
+                            .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                        setResults(resultsData);
+                    }
+                });
+                
+                // تحميل الكورسات
+                const coursesRef = window.rtdb.ref(window.db, 'courses');
+                window.rtdb.onValue(coursesRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        const coursesData = Object.entries(snapshot.val()).map(([id, data]) => ({
+                            id,
+                            ...data
+                        }));
+                        setCourses(coursesData);
+                    }
+                });
+            }, [user]);
+            
+            // إحصائيات
+            const totalExams = results.length;
+            const totalScore = results.reduce((sum, r) => sum + (r.score || 0), 0);
+            const totalPossible = results.reduce((sum, r) => sum + (r.total || 1), 0);
+            const averagePercentage = totalPossible > 0 ? Math.round((totalScore / totalPossible) * 100) : 0;
+            const correctCount = results.filter(r => r.correct === true).length;
+            
+            return (
+                <div className="space-y-6 animate-slide-up">
+                    <div className="glass-panel p-6">
+                        <h2 className="text-2xl font-bold flex items-center gap-2 mb-6">
+                            <GlassIcon name="bar-chart-2" size={24} />
+                            نتائج الامتحانات
+                        </h2>
+                        
+                        {/* الإحصائيات */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                            <div className="bg-white/5 p-4 rounded-xl text-center">
+                                <div className="text-2xl font-bold text-blue-400">{totalExams}</div>
+                                <div className="text-xs text-slate-400">إجمالي الامتحانات</div>
+                            </div>
+                            <div className="bg-white/5 p-4 rounded-xl text-center">
+                                <div className="text-2xl font-bold text-green-400">{totalScore}</div>
+                                <div className="text-xs text-slate-400">إجمالي الدرجات</div>
+                            </div>
+                            <div className="bg-white/5 p-4 rounded-xl text-center">
+                                <div className="text-2xl font-bold text-yellow-400">{averagePercentage}%</div>
+                                <div className="text-xs text-slate-400">متوسط النجاح</div>
+                            </div>
+                            <div className="bg-white/5 p-4 rounded-xl text-center">
+                                <div className="text-2xl font-bold text-purple-400">{correctCount}</div>
+                                <div className="text-xs text-slate-400">إجابات صحيحة</div>
+                            </div>
+                        </div>
+                        
+                        {results.length === 0 ? (
+                            <div className="text-center py-12">
+                                <GlassIcon name="bar-chart-2" size={48} className="mx-auto mb-4 opacity-50" />
+                                <p className="text-slate-400">لم تقم بحل أي امتحان بعد</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {results.map(result => {
+                                    const exam = exams.find(e => e.id === result.examId);
+                                    const course = exam ? courses.find(c => c.id === exam.courseId) : null;
+                                    
+                                    return (
+                                        <div key={result.id} className="exam-result p-5 rounded-xl">
+                                            <div className="flex flex-wrap items-center justify-between gap-4">
+                                                <div className="flex-1">
+                                                    <h3 className="font-bold text-lg mb-2">{exam?.question || 'امتحان'}</h3>
+                                                    <div className="flex flex-wrap gap-2 text-sm">
+                                                        <span className="bg-white/10 px-2 py-1 rounded">
+                                                            {course?.title || 'غير معروف'}
+                                                        </span>
+                                                        <span className="bg-white/10 px-2 py-1 rounded">
+                                                            {exam?.grade === '1sec' ? 'أولى' : exam?.grade === '2sec' ? 'تانية' : 'تالتة'}
+                                                        </span>
+                                                        <span className="bg-white/10 px-2 py-1 rounded">
+                                                            {new Date(result.timestamp).toLocaleDateString('ar-EG')}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="text-center">
+                                                    {result.score !== undefined ? (
+                                                        <>
+                                                            <div className={`text-2xl font-bold ${result.correct ? 'text-green-500' : 'text-red-500'}`}>
+                                                                {result.score} / {result.total}
+                                                            </div>
+                                                            <div className={`text-xs px-2 py-1 rounded ${result.correct ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
+                                                                {result.correct ? '✓ صحيح' : '✗ خطأ'}
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <div className="text-yellow-500">
+                                                            <Icon name="clock" size={24} className="mx-auto mb-1" />
+                                                            <span className="text-xs">قيد التصحيح</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
@@ -1745,92 +2487,319 @@
             );
         };
 
-        // ✅ Course Manager Component (for Admin)
-        const CourseManager = ({ courses, onAddCourse, onDeleteCourse, isSuperAdmin }) => {
+        // ✅ Updated Lecture Manager with Course selection
+        const LectureManager = ({ courses, onAddLecture, onDeleteLecture, isSuperAdmin }) => {
             const [showAddForm, setShowAddForm] = useState(false);
-            const [newCourse, setNewCourse] = useState({
+            const [newLecture, setNewLecture] = useState({
                 title: '',
+                link: '',
                 description: '',
-                image: '',
-                price: '',
-                duration: '30',
-                grade: '1sec'
+                grade: '1sec',
+                courseId: '',
+                isFree: false
             });
 
             const handleInputChange = (e) => {
-                setNewCourse({ ...newCourse, [e.target.name]: e.target.value });
+                const { name, value, type, checked } = e.target;
+                setNewLecture({
+                    ...newLecture,
+                    [name]: type === 'checkbox' ? checked : value
+                });
             };
 
             const handleSubmit = () => {
-                if (!newCourse.title || !newCourse.description || !newCourse.image || !newCourse.price) {
-                    alert('يرجى ملء جميع الحقول');
+                if (!newLecture.title || !newLecture.link || !newLecture.courseId) {
+                    alert('يرجى ملء جميع الحقول المطلوبة');
                     return;
                 }
-                onAddCourse(newCourse);
+                onAddLecture(newLecture);
                 setShowAddForm(false);
-                setNewCourse({ title: '', description: '', image: '', price: '', duration: '30', grade: '1sec' });
+                setNewLecture({
+                    title: '',
+                    link: '',
+                    description: '',
+                    grade: '1sec',
+                    courseId: '',
+                    isFree: false
+                });
             };
 
             return (
-                <div className="space-y-6 animate-slide-up">
-                    <div className="flex items-center justify-between">
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center">
                         <h2 className="text-2xl font-bold flex items-center gap-2">
-                            <div className="glass-icon"><Icon name="book-open" size={24} /></div>
-                            إدارة الكورسات
+                            <GlassIcon name="video" size={24} /> إدارة المحاضرات
                         </h2>
                         <button onClick={() => setShowAddForm(true)} className="btn-main px-6 py-2 rounded-xl font-bold flex items-center gap-2">
-                            <Icon name="plus" size={18} /> إضافة كورس
+                            <Icon name="plus" size={18} /> إضافة محاضرة
                         </button>
                     </div>
-
+                    
                     {showAddForm && (
                         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4" onClick={() => setShowAddForm(false)}>
-                            <div className="glass-panel p-8 max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                                <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                                    <div className="glass-icon"><Icon name="plus-circle" size={24} /></div>
-                                    إضافة كورس جديد
-                                </h3>
+                            <div className="glass-panel p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                                <h3 className="text-2xl font-bold mb-6">إضافة محاضرة جديدة</h3>
+                                
                                 <div className="space-y-4">
-                                    <input name="title" value={newCourse.title} onChange={handleInputChange} placeholder="عنوان الكورس" className="w-full p-3 bg-white/5 border border-white/10 rounded-xl" />
-                                    <textarea name="description" value={newCourse.description} onChange={handleInputChange} placeholder="وصف الكورس" className="w-full p-3 bg-white/5 border border-white/10 rounded-xl h-24 resize-none" />
-                                    <input name="image" value={newCourse.image} onChange={handleInputChange} placeholder="رابط الصورة التوضيحية" className="w-full p-3 bg-white/5 border border-white/10 rounded-xl" />
-                                    <input name="price" type="number" value={newCourse.price} onChange={handleInputChange} placeholder="السعر (ج.م)" className="w-full p-3 bg-white/5 border border-white/10 rounded-xl" />
-                                    <input name="duration" type="number" value={newCourse.duration} onChange={handleInputChange} placeholder="المدة (أيام)" className="w-full p-3 bg-white/5 border border-white/10 rounded-xl" />
-                                    <select name="grade" value={newCourse.grade} onChange={handleInputChange} className="w-full p-3 bg-white/5 border border-white/10 rounded-xl">
-                                        <option value="1sec">الصف الأول الثانوي</option>
-                                        <option value="2sec">الصف الثاني الثانوي</option>
-                                        <option value="3sec">الصف الثالث الثانوي</option>
-                                    </select>
+                                    <div>
+                                        <label className="block text-sm font-bold mb-2">عنوان المحاضرة</label>
+                                        <input
+                                            name="title"
+                                            value={newLecture.title}
+                                            onChange={handleInputChange}
+                                            className="w-full p-3 bg-white/5 border border-white/10 rounded-xl"
+                                            placeholder="مثال: شرح درس الميزان الصرفي"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-bold mb-2">رابط الفيديو</label>
+                                        <input
+                                            name="link"
+                                            value={newLecture.link}
+                                            onChange={handleInputChange}
+                                            className="w-full p-3 bg-white/5 border border-white/10 rounded-xl"
+                                            placeholder="رابط YouTube أو MP4 مباشر"
+                                        />
+                                        <p className="text-xs text-slate-400 mt-1">يدعم: YouTube, youtu.be, MP4 مباشر</p>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-bold mb-2">الوصف</label>
+                                        <textarea
+                                            name="description"
+                                            value={newLecture.description}
+                                            onChange={handleInputChange}
+                                            className="w-full p-3 bg-white/5 border border-white/10 rounded-xl h-24 resize-none"
+                                            placeholder="وصف مختصر للمحاضرة"
+                                        />
+                                    </div>
+                                    
+                                    <div className="grid md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-bold mb-2">الصف</label>
+                                            <select
+                                                name="grade"
+                                                value={newLecture.grade}
+                                                onChange={handleInputChange}
+                                                className="w-full p-3 bg-white/5 border border-white/10 rounded-xl"
+                                            >
+                                                <option value="1sec">أولى ثانوي</option>
+                                                <option value="2sec">تانية ثانوي</option>
+                                                <option value="3sec">تالتة ثانوي</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-bold mb-2">الكورس</label>
+                                            <select
+                                                name="courseId"
+                                                value={newLecture.courseId}
+                                                onChange={handleInputChange}
+                                                className="w-full p-3 bg-white/5 border border-white/10 rounded-xl"
+                                            >
+                                                <option value="">-- اختر كورس --</option>
+                                                {courses.map(course => (
+                                                    <option key={course.id} value={course.id}>
+                                                        {course.title} ({course.grade === '1sec' ? 'أولى' : course.grade === '2sec' ? 'تانية' : 'تالتة'})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            name="isFree"
+                                            id="isFree"
+                                            checked={newLecture.isFree}
+                                            onChange={handleInputChange}
+                                            className="w-5 h-5"
+                                        />
+                                        <label htmlFor="isFree">محاضرة مجانية (يمكن للجميع مشاهدتها)</label>
+                                    </div>
+                                    
                                     <div className="flex gap-3 pt-4">
-                                        <button onClick={() => setShowAddForm(false)} className="flex-1 py-3 bg-white/10 rounded-xl font-bold">إلغاء</button>
-                                        <button onClick={handleSubmit} className="flex-1 btn-main py-3 rounded-xl font-bold">إضافة</button>
+                                        <button onClick={() => setShowAddForm(false)} className="flex-1 py-3 bg-white/10 rounded-xl font-bold">
+                                            إلغاء
+                                        </button>
+                                        <button onClick={handleSubmit} className="flex-1 btn-main py-3 rounded-xl font-bold">
+                                            إضافة المحاضرة
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     )}
-
+                    
+                    {/* قائمة المحاضرات */}
                     <div className="grid gap-4">
-                        {courses.map(course => (
-                            <div key={course.id} className="glass-panel p-4 flex flex-col md:flex-row gap-4 items-center">
-                                <img src={course.image} className="w-24 h-24 rounded-xl object-cover" onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }} />
-                                <div className="flex-1">
-                                    <h3 className="font-bold text-lg">{course.title}</h3>
-                                    <p className="text-sm text-slate-400 line-clamp-2">{course.description}</p>
-                                    <div className="flex gap-4 mt-2 text-sm">
-                                        <span className="bg-brand-accent/10 text-brand-accent px-2 py-1 rounded">السعر: {course.price} ج.م</span>
-                                        <span className="bg-blue-500/10 text-blue-400 px-2 py-1 rounded">المدة: {course.duration} يوم</span>
-                                        <span className="bg-purple-500/10 text-purple-400 px-2 py-1 rounded">الصف: {course.grade}</span>
-                                    </div>
-                                </div>
-                                <button onClick={() => onDeleteCourse(course.id)} className="bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white p-2 rounded-lg transition">
-                                    <Icon name="trash-2" size={18} />
-                                </button>
-                            </div>
-                        ))}
+                        {/* سيتم عرض المحاضرات هنا */}
                     </div>
                 </div>
             );
+        };
+
+        // ✅ Updated Whiteboard Manager with Grade selection
+        const WhiteboardManager = ({ whiteboards, onAddWhiteboard, onDeleteWhiteboard }) => {
+            const [showAddForm, setShowAddForm] = useState(false);
+            const [newWhiteboard, setNewWhiteboard] = useState({
+                title: '',
+                link: '',
+                grade: '1sec'
+            });
+
+            const handleInputChange = (e) => {
+                const { name, value } = e.target;
+                setNewWhiteboard({ ...newWhiteboard, [name]: value });
+            };
+
+            const handleSubmit = () => {
+                if (!newWhiteboard.title || !newWhiteboard.link) {
+                    alert('يرجى ملء جميع الحقول');
+                    return;
+                }
+                onAddWhiteboard(newWhiteboard);
+                setShowAddForm(false);
+                setNewWhiteboard({ title: '', link: '', grade: '1sec' });
+            };
+
+            return (
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-2xl font-bold flex items-center gap-2">
+                            <GlassIcon name="file-text" size={24} /> إدارة السبورات
+                        </h2>
+                        <button onClick={() => setShowAddForm(true)} className="btn-main px-6 py-2 rounded-xl font-bold flex items-center gap-2">
+                            <Icon name="plus" size={18} /> إضافة سبورة
+                        </button>
+                    </div>
+                    
+                    {showAddForm && (
+                        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4" onClick={() => setShowAddForm(false)}>
+                            <div className="glass-panel p-8 max-w-md w-full" onClick={e => e.stopPropagation()}>
+                                <h3 className="text-2xl font-bold mb-6">إضافة سبورة جديدة</h3>
+                                
+                                <div className="space-y-4">
+                                    <input
+                                        name="title"
+                                        value={newWhiteboard.title}
+                                        onChange={handleInputChange}
+                                        placeholder="عنوان السبورة"
+                                        className="w-full p-3 bg-white/5 border border-white/10 rounded-xl"
+                                    />
+                                    
+                                    <input
+                                        name="link"
+                                        value={newWhiteboard.link}
+                                        onChange={handleInputChange}
+                                        placeholder="رابط الصورة أو PDF"
+                                        className="w-full p-3 bg-white/5 border border-white/10 rounded-xl"
+                                    />
+                                    
+                                    <select
+                                        name="grade"
+                                        value={newWhiteboard.grade}
+                                        onChange={handleInputChange}
+                                        className="w-full p-3 bg-white/5 border border-white/10 rounded-xl"
+                                    >
+                                        <option value="1sec">الصف الأول الثانوي</option>
+                                        <option value="2sec">الصف الثاني الثانوي</option>
+                                        <option value="3sec">الصف الثالث الثانوي</option>
+                                    </select>
+                                    
+                                    <div className="flex gap-3 pt-4">
+                                        <button onClick={() => setShowAddForm(false)} className="flex-1 py-3 bg-white/10 rounded-xl font-bold">
+                                            إلغاء
+                                        </button>
+                                        <button onClick={handleSubmit} className="flex-1 btn-main py-3 rounded-xl font-bold">
+                                            إضافة السبورة
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // ✅ Updated Whiteboards Gallery with Grade filter
+        const WhiteboardsGallery = ({ whiteboards, userGrade }) => {
+            const [filterGrade, setFilterGrade] = useState('all');
+            
+            const filteredWhiteboards = whiteboards.filter(wb => {
+                if (filterGrade !== 'all' && wb.grade !== filterGrade) return false;
+                if (userGrade && wb.grade !== userGrade && wb.grade !== 'all') return false;
+                return true;
+            });
+            
+            return (
+                <div className="space-y-6 animate-slide-up">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="glass-icon bg-purple-500/20 text-purple-500 border-purple-500/30">
+                            <Icon name="image" size={24} />
+                        </div>
+                        <h2 className="text-2xl font-bold">السبورات والمذكرات</h2>
+                    </div>
+                    
+                    {/* فلترة السبورات */}
+                    <div className="flex gap-2 mb-4">
+                        {['all', '1sec', '2sec', '3sec'].map(g => (
+                            <button
+                                key={g}
+                                onClick={() => setFilterGrade(g)}
+                                className={`px-4 py-2 rounded-xl font-bold transition ${
+                                    filterGrade === g 
+                                        ? 'bg-brand-primary text-white' 
+                                        : 'bg-white/5 text-slate-400 hover:bg-white/10'
+                                }`}
+                            >
+                                {g === 'all' ? 'الكل' : g === '1sec' ? 'أولى' : g === '2sec' ? 'تانية' : 'تالتة'}
+                            </button>
+                        ))}
+                    </div>
+                    
+                    {filteredWhiteboards.length === 0 ? (
+                        <div className="text-center py-12 text-slate-500">لا توجد سبورات حالياً</div>
+                    ) : (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            {filteredWhiteboards.map(wb => (
+                                <div key={wb.id} className="glass-panel p-0 overflow-hidden group hover:-translate-y-1 transition duration-500">
+                                    <div className="h-48 bg-slate-900 relative">
+                                        <img src={wb.link} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition duration-500" onError={(e) => { e.target.src = 'https://placehold.co/400x300?text=PDF'; }} />
+                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition backdrop-blur-sm">
+                                            <a href={wb.link} target="_blank" className="bg-white text-black px-6 py-2 rounded-full font-bold flex items-center gap-2 hover:scale-105 transition">
+                                                <Icon name="external-link" size={18} /> فتح
+                                            </a>
+                                        </div>
+                                        <span className="absolute top-2 left-2 bg-brand-primary/80 text-white px-2 py-1 rounded text-xs">
+                                            {wb.grade === '1sec' ? 'أولى' : wb.grade === '2sec' ? 'تانية' : 'تالتة'}
+                                        </span>
+                                    </div>
+                                    <div className="p-4 border-t border-white/5">
+                                        <h4 className="font-bold text-sm truncate">{wb.title}</h4>
+                                        <span className="text-xs text-slate-400 mt-1 block">{wb.date}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // ✅ دالة التحقق من صلاحية المحاضرة
+        const isLectureAllowed = (lecture, user) => {
+            if (!user) return false;
+            
+            // إذا كانت المحاضرة مجانية، الجميع يشوفها
+            if (lecture.isFree) return true;
+            
+            // التحقق من أن الطالب مشترك في الكورس
+            const userEnrolledCourses = user.enrolledCourses || [];
+            return userEnrolledCourses.includes(lecture.courseId);
         };
 
         const RecordingsGallery = ({ recordings }) => (
@@ -1854,39 +2823,6 @@
                                     <h4 className="font-bold mb-2">{rec.title}</h4>
                                     <audio src={rec.link} controls className="w-full h-8 opacity-80 hover:opacity-100 transition" />
                                     <p className="text-xs text-slate-500 mt-2">{rec.date}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-        );
-
-        const WhiteboardsGallery = ({ whiteboards }) => (
-            <div className="space-y-6 animate-slide-up">
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="glass-icon bg-purple-500/20 text-purple-500 border-purple-500/30">
-                        <Icon name="image" size={24} />
-                    </div>
-                    <h2 className="text-2xl font-bold">السبورات والمذكرات</h2>
-                </div>
-                {whiteboards.length === 0 ? (
-                    <div className="text-center py-12 text-slate-500">لا توجد سبورات حالياً</div>
-                ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {whiteboards.map(wb => (
-                            <div key={wb.id} className="glass-panel p-0 overflow-hidden group hover:-translate-y-1 transition duration-500">
-                                <div className="h-48 bg-slate-900 relative">
-                                    <img src={wb.link} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition duration-500" onError={(e) => { e.target.src = 'https://placehold.co/400x300?text=PDF'; }} />
-                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition backdrop-blur-sm">
-                                        <a href={wb.link} target="_blank" className="bg-white text-black px-6 py-2 rounded-full font-bold flex items-center gap-2 hover:scale-105 transition">
-                                            <Icon name="external-link" size={18} /> فتح
-                                        </a>
-                                    </div>
-                                </div>
-                                <div className="p-4 border-t border-white/5">
-                                    <h4 className="font-bold text-sm truncate">{wb.title}</h4>
-                                    <span className="text-xs text-slate-400 mt-1 block">{wb.date}</span>
                                 </div>
                             </div>
                         ))}
@@ -1947,6 +2883,10 @@
             const [showExamBuilder, setShowExamBuilder] = useState(false);
             const [showLoginModal, setShowLoginModal] = useState(false);
             const [selectedCourse, setSelectedCourse] = useState(null);
+            const [selectedExam, setSelectedExam] = useState(null);
+            const [showExamsList, setShowExamsList] = useState(false);
+            const [showResults, setShowResults] = useState(false);
+            const [courseFilter, setCourseFilter] = useState('all');
 
             useEffect(() => {
                 document.body.classList.toggle('light-mode', !isDarkMode);
@@ -1978,7 +2918,7 @@
             useEffect(() => {
                 const unsubscribeAuth = window.authMethods.onAuthStateChanged(window.auth, (u) => {
                     if (u) {
-                        if (u.email === SUPER_ADMIN_EMAIL || u.uid === SUPER_ADMIN_UID) {
+                        if (u.email === SUPER_ADMIN_EMAIL || u.uid === SUPER_ADMIN_UID) { 
                             const bossData = {
                                 uid: u.uid,
                                 name: 'مروان سامي',
@@ -2082,7 +3022,7 @@
 
             const calculatePoints = (studentId) => {
                 const attendance = dataState.attendance[studentId] || {};
-                const attendancePoints = Object.values(attendance).filter(a => a && a.status === 'present').length * 5;
+                const attendancePoints = Object.values(attendance).filter(a => a.status === 'present').length * 5;
                 return attendancePoints;
             };
 
@@ -2097,29 +3037,19 @@
                 showNotification('تم تحديث الحضور ✅');
             };
 
-            // ✅ FIXED: دالة تسجيل الحضور اليومي للطالب
+            // ✅ دالة تسجيل الحضور اليومي للطالب
             const markDailyAttendance = async (studentId, date, status) => {
-                try {
-                    // تسجيل الحضور
-                    await window.rtdb.update(window.rtdb.ref(window.db, `attendance/${studentId}/${date}`), {
-                        status,
-                        timestamp: Date.now()
-                    });
-
-                    // حساب النقاط الحالية وإضافة 5 نقاط جديدة
-                    const currentPoints = calculatePoints(studentId);
-                    const newPoints = currentPoints + 5;
-
-                    // تحديث النقاط في قاعدة البيانات
-                    await window.rtdb.update(window.rtdb.ref(window.db, `users/${studentId}`), {
-                        points: newPoints
-                    });
-
-                    showNotification('تم تسجيل حضورك بنجاح! +5 نقاط', 'success');
-                } catch (error) {
-                    console.error("Attendance Error:", error);
-                    showNotification('حدث خطأ أثناء تسجيل الحضور', 'error');
-                }
+                await window.rtdb.update(window.rtdb.ref(window.db, `attendance/${studentId}/${date}`), {
+                    status, timestamp: Date.now()
+                });
+                
+                // تحديث النقاط (كل يوم حضور = 5 نقاط)
+                const points = calculatePoints(studentId) + 5;
+                await window.rtdb.update(window.rtdb.ref(window.db, `users/${studentId}`), {
+                    points: points
+                });
+                
+                showNotification('تم تسجيل حضورك بنجاح! +5 نقاط', 'success');
             };
 
             const addNewAdmin = async (email, role) => {
@@ -2222,6 +3152,42 @@
                 }
             };
 
+            // ✅ دالة إضافة محاضرة
+            const addLecture = async (lectureData) => {
+                await window.rtdb.push(window.rtdb.ref(window.db, 'lectures'), {
+                    ...lectureData,
+                    date: new Date().toLocaleDateString('ar-EG'),
+                    ts: Date.now()
+                });
+                showNotification('تم إضافة المحاضرة بنجاح ✅');
+            };
+
+            // ✅ دالة حذف محاضرة
+            const deleteLecture = async (lectureId) => {
+                if (confirm('هل أنت متأكد من حذف هذه المحاضرة؟')) {
+                    await window.rtdb.remove(window.rtdb.ref(window.db, `lectures/${lectureId}`));
+                    showNotification('تم حذف المحاضرة');
+                }
+            };
+
+            // ✅ دالة إضافة سبورة
+            const addWhiteboard = async (whiteboardData) => {
+                await window.rtdb.push(window.rtdb.ref(window.db, 'whiteboards'), {
+                    ...whiteboardData,
+                    date: new Date().toLocaleDateString('ar-EG'),
+                    ts: Date.now()
+                });
+                showNotification('تم إضافة السبورة بنجاح ✅');
+            };
+
+            // ✅ دالة حذف سبورة
+            const deleteWhiteboard = async (whiteboardId) => {
+                if (confirm('هل أنت متأكد من حذف هذه السبورة؟')) {
+                    await window.rtdb.remove(window.rtdb.ref(window.db, `whiteboards/${whiteboardId}`));
+                    showNotification('تم حذف السبورة');
+                }
+            };
+
             // ✅ Enhanced registration function with better error handling
             const handleStudentRegistration = async () => {
                 if (!regData.firstName || !regData.fatherName || !regData.grandfatherName) {
@@ -2297,17 +3263,17 @@
 
                             <div className="flex items-center gap-2 md:gap-4 shrink-0">
                                 <ThemeToggle isDark={isDarkMode} onToggle={setIsDarkMode} />
-
+                                
                                 {user ? (
-                                    <button
-                                        onClick={() => setView(userType === 'admin' ? 'admin' : 'student')}
+                                    <button 
+                                        onClick={() => setView(userType === 'admin' ? 'admin' : 'student')} 
                                         className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-bold transition flex items-center gap-2 shadow-lg"
                                     >
                                         <Icon name="arrow-left" size={18} /> العودة إلى صفحتك
                                     </button>
                                 ) : (
-                                    <button
-                                        onClick={() => setShowLoginModal(true)}
+                                    <button 
+                                        onClick={() => setShowLoginModal(true)} 
                                         className="bg-white text-black hover:bg-slate-200 px-6 py-2 rounded-full font-bold transition flex items-center gap-2 shadow-lg"
                                     >
                                         <Icon name="log-in" size={18} /> تسجيل الدخول
@@ -2317,7 +3283,7 @@
                         </div>
                     </header>
 
-                    <AuthModal
+                    <AuthModal 
                         isOpen={showLoginModal}
                         onClose={() => setShowLoginModal(false)}
                         onGoogleLogin={handleGoogleLogin}
@@ -2354,7 +3320,7 @@
                                         <Icon name="check-circle" size={20} />
                                         مرحباً بعودتك {user.name}!
                                     </p>
-                                    <button
+                                    <button 
                                         onClick={() => setView(userType === 'admin' ? 'admin' : 'student')}
                                         className="mt-3 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-bold inline-flex items-center gap-2"
                                     >
@@ -2452,10 +3418,10 @@
                     )}
 
                     {selectedCourse && (
-                        <CoursePurchaseModal
-                            course={selectedCourse}
-                            onClose={() => setSelectedCourse(null)}
-                            teacherNumber={CONTACT_INFO.vodafoneNumber}
+                        <CoursePurchaseModal 
+                            course={selectedCourse} 
+                            onClose={() => setSelectedCourse(null)} 
+                            teacherNumber={CONTACT_INFO.vodafoneNumber} 
                             user={user}
                             onRequireLogin={() => {
                                 setSelectedCourse(null);
@@ -2541,29 +3507,29 @@
                                     <Icon name="user" size={16} /> الاسم الثلاثي (باللغة العربية)
                                 </h4>
                                 <div className="grid md:grid-cols-3 gap-4">
-                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center focus:border-brand-accent transition"
+                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center focus:border-brand-accent transition" 
                                         placeholder="الاسم الأول"
                                         value={regData.firstName}
                                         onChange={e => {
                                             const val = e.target.value;
                                             if (/^[\u0600-\u06FFa-zA-Z\s]*$/.test(val)) setRegData({ ...regData, firstName: val });
-                                        }}
+                                        }} 
                                     />
-                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center focus:border-brand-accent transition"
+                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center focus:border-brand-accent transition" 
                                         placeholder="اسم الأب"
                                         value={regData.fatherName}
                                         onChange={e => {
                                             const val = e.target.value;
                                             if (/^[\u0600-\u06FFa-zA-Z\s]*$/.test(val)) setRegData({ ...regData, fatherName: val });
-                                        }}
+                                        }} 
                                     />
-                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center focus:border-brand-accent transition"
+                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white text-center focus:border-brand-accent transition" 
                                         placeholder="اسم الجد"
                                         value={regData.grandfatherName}
                                         onChange={e => {
                                             const val = e.target.value;
                                             if (/^[\u0600-\u06FFa-zA-Z\s]*$/.test(val)) setRegData({ ...regData, grandfatherName: val });
-                                        }}
+                                        }} 
                                     />
                                 </div>
                                 <p className="text-xs text-slate-500 mt-2 text-center">⚠️ يرجى كتابة الاسم بدون أرقام أو رموز</p>
@@ -2571,54 +3537,54 @@
 
                             <div className="grid md:grid-cols-2 gap-4">
                                 <div className="relative">
-                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition"
-                                        placeholder="رقم تليفونك (11 رقم)"
+                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition" 
+                                        placeholder="رقم تليفونك (11 رقم)" 
                                         maxLength="11"
                                         value={regData.phone}
                                         onChange={e => {
                                             const val = e.target.value;
                                             if (/^\d*$/.test(val)) setRegData({ ...regData, phone: val });
                                             else showNotification('أرقام فقط مسموح بها في الهاتف', 'error');
-                                        }}
+                                        }} 
                                     />
-                                    <div className="absolute left-4 top-4 text-slate-500"><Icon name="smartphone" size={18} /></div>
+                                    <div className="absolute left-4 top-4 text-slate-500"><Icon name="smartphone" size={18}/></div>
                                 </div>
                                 <div className="relative">
-                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition"
-                                        placeholder="رقم ولي الأمر (11 رقم)"
+                                    <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition" 
+                                        placeholder="رقم ولي الأمر (11 رقم)" 
                                         maxLength="11"
                                         value={regData.parentPhone}
                                         onChange={e => {
                                             const val = e.target.value;
                                             if (/^\d*$/.test(val)) setRegData({ ...regData, parentPhone: val });
                                             else showNotification('أرقام فقط مسموح بها', 'error');
-                                        }}
+                                        }} 
                                     />
-                                    <div className="absolute left-4 top-4 text-slate-500"><Icon name="phone" size={18} /></div>
+                                    <div className="absolute left-4 top-4 text-slate-500"><Icon name="phone" size={18}/></div>
                                 </div>
                             </div>
 
-                            <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition"
-                                placeholder="اسم المدرسة 🏫"
+                            <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition" 
+                                placeholder="اسم المدرسة 🏫" 
                                 value={regData.school}
-                                onChange={e => setRegData({ ...regData, school: e.target.value })}
+                                onChange={e => setRegData({ ...regData, school: e.target.value })} 
                             />
 
                             <div className="grid md:grid-cols-2 gap-4">
-                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition"
-                                    placeholder="المحافظة 🗺️"
+                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition" 
+                                    placeholder="المحافظة 🗺️" 
                                     value={regData.governorate}
-                                    onChange={e => setRegData({ ...regData, governorate: e.target.value })}
+                                    onChange={e => setRegData({ ...regData, governorate: e.target.value })} 
                                 />
-                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition"
-                                    placeholder="المدينة 📍"
+                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white focus:border-brand-accent transition" 
+                                    placeholder="المدينة 📍" 
                                     value={regData.city}
-                                    onChange={e => setRegData({ ...regData, city: e.target.value })}
+                                    onChange={e => setRegData({ ...regData, city: e.target.value })} 
                                 />
                             </div>
 
                             {regData.accountType === 'student' && (
-                                <select className="w-full p-4 bg-black/30 border border-white/10 rounded-xl outline-none text-white appearance-none cursor-pointer"
+                                <select className="w-full p-4 bg-black/30 border border-white/10 rounded-xl outline-none text-white appearance-none cursor-pointer" 
                                     onChange={e => setRegData({ ...regData, grade: e.target.value })} value={regData.grade}>
                                     <option value="1sec">الصف الأول الثانوي</option>
                                     <option value="2sec">الصف الثاني الثانوي</option>
@@ -2627,9 +3593,9 @@
                             )}
 
                             {regData.accountType === 'parent' && (
-                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white"
-                                    placeholder="إيميل الطالب المرتبط (اختياري)"
-                                    onChange={e => setRegData({ ...regData, linkedStudentEmail: e.target.value })}
+                                <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none text-white" 
+                                    placeholder="إيميل الطالب المرتبط (اختياري)" 
+                                    onChange={e => setRegData({ ...regData, linkedStudentEmail: e.target.value })} 
                                 />
                             )}
 
@@ -2644,7 +3610,7 @@
                                 />
                             </div>
 
-                            <button
+                            <button 
                                 onClick={handleStudentRegistration}
                                 className="btn-main w-full py-4 rounded-xl text-lg font-bold flex items-center justify-center gap-2 hover:scale-105 transition-transform shadow-lg shadow-brand-accent/20"
                             >
@@ -2658,10 +3624,15 @@
             if (view === 'student') {
                 const daysLeft = calculateSubscriptionDays(user?.subscriptionEnd);
                 const points = calculatePoints(user?.uid);
-
+                
                 const enrolledCourses = user?.enrolledCourses || [];
                 const paidCourses = dataState.courses.filter(c => enrolledCourses.includes(c.id));
                 const availableCourses = dataState.courses.filter(c => !enrolledCourses.includes(c.id));
+                
+                // فلترة المحاضرات حسب الكورسات المسجل فيها الطالب
+                const filteredLectures = dataState.lectures.filter(lec => 
+                    lec.isFree || enrolledCourses.includes(lec.courseId)
+                );
 
                 return (
                     <div className={`min-h-screen flex flex-col md:flex-row ${isDarkMode ? 'bg-brand-dark text-white' : 'bg-slate-50 text-slate-900'}`}>
@@ -2690,6 +3661,8 @@
                                 {[
                                     { id: 'home', l: 'الرئيسية', i: 'home' },
                                     { id: 'lectures', l: 'المحاضرات', i: 'play-circle' },
+                                    { id: 'exams', l: 'الامتحانات', i: 'clipboard-list' },
+                                    { id: 'results', l: 'نتائجي', i: 'bar-chart-2' },
                                     { id: 'whiteboards', l: 'السبورات', i: 'image' },
                                     { id: 'recordings', l: 'التسجيلات', i: 'mic' },
                                     { id: 'flashcards', l: 'البطاقات', i: 'layers' },
@@ -2721,7 +3694,7 @@
                             </header>
 
                             <main className="px-4 md:px-8 max-w-6xl mx-auto w-full relative z-10">
-                                {!user?.isPaid && activeTab !== 'home' && activeTab !== 'mycourses' && activeTab !== 'attendance' ? (
+                                {!user?.isPaid && activeTab !== 'home' && activeTab !== 'mycourses' && activeTab !== 'attendance' && activeTab !== 'results' ? (
                                     <div className="glass-panel p-10 text-center mt-10 animate-slide-up">
                                         <GlassIcon name="lock" size={48} className="mx-auto mb-6" />
                                         <h2 className="text-3xl font-bold mb-3">المحتوى مغلق 🔒</h2>
@@ -2738,7 +3711,7 @@
                                                         <p className="text-blue-100 mb-4">رتبتك: <RankBadge points={points} /></p>
                                                         <div className="flex flex-wrap gap-4">
                                                             <div className="bg-black/30 px-4 py-2 rounded-lg flex items-center gap-2 border border-white/10">
-                                                                <Icon name="video" size={16} className="text-brand-accent" /> {dataState.lectures.length} محاضرة
+                                                                <Icon name="video" size={16} className="text-brand-accent" /> {filteredLectures.length} محاضرة
                                                             </div>
                                                             {user?.isPaid && daysLeft > 0 && (
                                                                 <div className="bg-green-500/20 px-4 py-2 rounded-lg flex items-center gap-2 border border-green-500">
@@ -2751,7 +3724,7 @@
 
                                                 <SubscriptionStatusCard user={user} enrolledCourses={paidCourses} />
 
-                                                {/* قسم الكورسات المتاحة للشراء - تم إضافته هنا */}
+                                                {/* قسم الكورسات المتاحة للشراء */}
                                                 {availableCourses.length > 0 && (
                                                     <div className="glass-panel p-6">
                                                         <div className="flex items-center justify-between mb-6">
@@ -2768,8 +3741,8 @@
 
                                                         <div className="grid md:grid-cols-3 gap-4">
                                                             {availableCourses.map(course => (
-                                                                <div
-                                                                    key={course.id}
+                                                                <div 
+                                                                    key={course.id} 
                                                                     onClick={() => setSelectedCourse(course)}
                                                                     className="bg-white/5 rounded-xl border border-white/10 overflow-hidden hover:scale-105 hover:border-purple-500/50 transition-all duration-300 cursor-pointer"
                                                                 >
@@ -2802,7 +3775,7 @@
                                                                 <p className="text-sm text-slate-400">لديك {paidCourses.length} كورس مفعل</p>
                                                             </div>
                                                         </div>
-                                                        <button
+                                                        <button 
                                                             onClick={() => setActiveTab('mycourses')}
                                                             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2"
                                                         >
@@ -2844,9 +3817,9 @@
                                         )}
 
                                         {activeTab === 'attendance' && (
-                                            <EnhancedAttendanceTracker
-                                                attendance={dataState.attendance}
-                                                studentId={user?.uid}
+                                            <EnhancedAttendanceTracker 
+                                                attendance={dataState.attendance} 
+                                                studentId={user?.uid} 
                                                 onMarkAttendance={markDailyAttendance}
                                             />
                                         )}
@@ -2891,7 +3864,7 @@
                                                 </div>
 
                                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                                    {dataState.lectures.filter(lec =>
+                                                    {filteredLectures.filter(lec =>
                                                         lectureGradeFilter === 'all' || lec.grade === lectureGradeFilter
                                                     ).length === 0 ? (
                                                         <div className="col-span-full text-center py-12 glass-panel">
@@ -2899,17 +3872,17 @@
                                                             <p className="text-slate-500 font-bold">مفيش محاضرات حالياً</p>
                                                         </div>
                                                     ) : (
-                                                        dataState.lectures
+                                                        filteredLectures
                                                             .filter(lec => lectureGradeFilter === 'all' || lec.grade === lectureGradeFilter)
                                                             .map(lec => {
-                                                                const isSubscriptionActive = user?.isPaid && (!user.subscriptionEnd || new Date(user.subscriptionEnd) > new Date());
-                                                                const isLocked = !lec.isFree && !isSubscriptionActive;
+                                                                const isAllowed = isLectureAllowed(lec, user);
+                                                                const isLocked = !lec.isFree && !isAllowed;
+                                                                
                                                                 return (
                                                                     <div key={lec.id}
                                                                         onClick={() => {
                                                                             if (isLocked) {
-                                                                                showNotification('المحتوى مغلق - اشترك الآن للوصول الكامل', 'error');
-                                                                                setActiveTab('home');
+                                                                                showNotification('هذه المحاضرة غير متاحة في كورساتك المشترك بها', 'error');
                                                                                 return;
                                                                             }
                                                                             setSelectedLecture(lec);
@@ -2923,8 +3896,8 @@
                                                                             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-10 rounded-xl">
                                                                                 <div className="text-center">
                                                                                     <div className="glass-icon mx-auto mb-2"><Icon name="lock" size={32} /></div>
-                                                                                    <p className="font-bold text-sm">محتوى مدفوع</p>
-                                                                                    <p className="text-xs text-slate-400">اشترك للوصول</p>
+                                                                                    <p className="font-bold text-sm">غير مشترك</p>
+                                                                                    <p className="text-xs text-slate-400">اشترك في الكورس أولاً</p>
                                                                                 </div>
                                                                             </div>
                                                                         )}
@@ -2941,7 +3914,6 @@
 
                                                                             <span className="absolute top-3 left-3 bg-brand-primary/80 text-white px-2 py-1 rounded-lg text-xs font-bold">
                                                                                 {lec.grade === '1sec' ? 'أولى' : lec.grade === '2sec' ? 'تانية' : 'تالتة'}
-
                                                                             </span>
                                                                         </div>
                                                                         <div className="p-5">
@@ -2956,8 +3928,20 @@
                                             </div>
                                         )}
 
+                                        {activeTab === 'exams' && (
+                                            <ExamsList 
+                                                exams={dataState.exams} 
+                                                user={user} 
+                                                onSelectExam={(exam) => setSelectedExam(exam)}
+                                            />
+                                        )}
+                                        
+                                        {activeTab === 'results' && (
+                                            <ResultsPage user={user} exams={dataState.exams} />
+                                        )}
+
                                         {activeTab === 'whiteboards' && (
-                                            <WhiteboardsGallery whiteboards={dataState.whiteboards} />
+                                            <WhiteboardsGallery whiteboards={dataState.whiteboards} userGrade={user?.grade} />
                                         )}
 
                                         {activeTab === 'recordings' && (
@@ -2970,7 +3954,7 @@
                                                     <Icon name="arrow-right" /> رجوع للمحاضرات
                                                 </button>
                                                 <div className="glass-panel overflow-hidden p-0 mb-8">
-                                                    {renderContent(selectedLecture.link, 'video')}
+                                                    <PlyrVideoPlayer src={selectedLecture.link} title={selectedLecture.title} />
                                                     <div className="p-6">
                                                         <h2 className="text-2xl font-bold mb-2">{selectedLecture.title}</h2>
                                                         <p className="text-slate-300 whitespace-pre-wrap">{selectedLecture.description}</p>
@@ -2979,8 +3963,19 @@
                                             </div>
                                         )}
 
+                                        {selectedExam && (
+                                            <ExamPlayer 
+                                                exam={selectedExam} 
+                                                onClose={() => setSelectedExam(null)} 
+                                                user={user}
+                                                onComplete={() => {
+                                                    // تحديث بعد الانتهاء
+                                                }}
+                                            />
+                                        )}
+
                                         {activeTab === 'mycourses' && (
-                                            <StudentEnrolledCourses
+                                            <StudentEnrolledCourses 
                                                 user={user}
                                                 enrolledCourses={paidCourses}
                                                 onBackToHome={() => setActiveTab('home')}
@@ -3029,10 +4024,10 @@
                         </div>
 
                         {selectedCourse && (
-                            <CoursePurchaseModal
-                                course={selectedCourse}
-                                onClose={() => setSelectedCourse(null)}
-                                teacherNumber={CONTACT_INFO.vodafoneNumber}
+                            <CoursePurchaseModal 
+                                course={selectedCourse} 
+                                onClose={() => setSelectedCourse(null)} 
+                                teacherNumber={CONTACT_INFO.vodafoneNumber} 
                                 user={user}
                                 onRequireLogin={() => {
                                     setSelectedCourse(null);
@@ -3070,6 +4065,8 @@
                                         {[
                                             { id: 'home', l: 'الرئيسية', i: 'home' },
                                             { id: 'lectures', l: 'المحاضرات', i: 'play-circle' },
+                                            { id: 'exams', l: 'الامتحانات', i: 'clipboard-list' },
+                                            { id: 'results', l: 'نتائجي', i: 'bar-chart-2' },
                                             { id: 'flashcards', l: 'البطاقات', i: 'layers' },
                                             { id: 'mycourses', l: 'كورساتي المفعلة', i: 'check-circle' },
                                             { id: 'qa', l: 'أسئلة وأجوبة', i: 'help-circle' }
@@ -3131,9 +4128,9 @@
                                     { id: 'attendance', l: 'الحضور والمتابعة', i: 'calendar-check' },
                                     { id: 'courses', l: 'الكورسات', i: 'book-open' },
                                     { id: 'lectures', l: 'المحاضرات', i: 'video' },
+                                    { id: 'exams', l: 'الامتحانات', i: 'clipboard-list' },
                                     { id: 'whiteboards', l: 'السبورات', i: 'file-text' },
                                     { id: 'recordings', l: 'التسجيلات', i: 'mic' },
-                                    { id: 'exams', l: 'الامتحانات', i: 'clipboard-list' },
                                     { id: 'flashcards', l: 'البطاقات', i: 'layers' },
                                     { id: 'qa', l: 'الأسئلة', i: 'help-circle' },
                                     { id: 'announcements', l: 'الإعلانات', i: 'megaphone' },
@@ -3423,65 +4420,12 @@
                                 )}
 
                                 {activeTab === 'lectures' && (
-                                    <div className="space-y-6 animate-slide-up">
-                                        <div className="glass-panel p-6">
-                                            <h3 className="font-bold mb-4">إضافة محاضرة جديدة</h3>
-                                            <div className="grid md:grid-cols-2 gap-4 mb-4">
-                                                <input id="lecTitle" placeholder="عنوان المحاضرة" className="bg-white/5 border border-white/10 p-3 rounded-xl" />
-                                                <input id="lecLink" placeholder="رابط الفيديو (YouTube/Drive)" className="bg-white/5 border border-white/10 p-3 rounded-xl" />
-                                            </div>
-                                            <div className="grid md:grid-cols-2 gap-4 mb-4">
-                                                <select id="lecGrade" className="bg-black/20 border border-white/10 p-3 rounded-xl text-white">
-                                                    <option value="all">كل الصفوف</option>
-                                                    <option value="1sec">أولى ثانوي</option>
-                                                    <option value="2sec">تانية ثانوي</option>
-                                                    <option value="3sec">تالتة ثانوي</option>
-                                                </select>
-                                            </div>
-                                            <textarea id="lecDesc" placeholder="وصف المحاضرة" className="w-full bg-white/5 border border-white/10 p-3 rounded-xl h-24 mb-4"></textarea>
-                                            <div className="flex gap-4 items-center mb-4">
-                                                <label className="flex items-center gap-2 cursor-pointer">
-                                                    <input type="checkbox" id="lecFree" className="w-5 h-5 rounded" />
-                                                    <span>محاضرة مجانية</span>
-                                                </label>
-                                            </div>
-                                            <button onClick={() => {
-                                                const title = document.getElementById('lecTitle').value;
-                                                const link = document.getElementById('lecLink').value;
-                                                const desc = document.getElementById('lecDesc').value;
-                                                const grade = document.getElementById('lecGrade').value;
-                                                const isFree = document.getElementById('lecFree').checked;
-                                                if (title && link) {
-                                                    uploadItem('lectures', { title, link, description: desc, isFree, grade });
-                                                    document.getElementById('lecTitle').value = '';
-                                                    document.getElementById('lecLink').value = '';
-                                                    document.getElementById('lecDesc').value = '';
-                                                }
-                                            }} className="btn-main px-6 py-3 rounded-xl font-bold">نشر المحاضرة</button>
-                                        </div>
-
-                                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                            {dataState.lectures.filter(l => isSuperAdmin || l.grade === 'all' || l.grade === (user?.grade)).map(lec => (
-                                                <div key={lec.id} className="glass-panel p-4">
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <span className="text-xs bg-white/10 px-2 py-1 rounded">{lec.grade === 'all' ? 'الكل' : lec.grade}</span>
-                                                        {lec.isFree && <span className="text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded">مجاني</span>}
-                                                    </div>
-                                                    <h4 className="font-bold mb-2">{lec.title}</h4>
-                                                    <p className="text-xs text-slate-400 mb-3 line-clamp-2">{lec.description}</p>
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="text-xs text-slate-500">{lec.date}</span>
-                                                        <button onClick={() => {
-                                                            if (confirm('متأكد تحذف المحاضرة؟'))
-                                                                window.rtdb.remove(window.rtdb.ref(window.db, 'lectures/' + lec.id));
-                                                        }} className="text-red-400 hover:text-red-300">
-                                                            <Icon name="trash-2" size={16} />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
+                                    <LectureManager
+                                        courses={dataState.courses}
+                                        onAddLecture={addLecture}
+                                        onDeleteLecture={deleteLecture}
+                                        isSuperAdmin={isSuperAdmin}
+                                    />
                                 )}
 
                                 {activeTab === 'exams' && (
@@ -3509,18 +4453,29 @@
                                                                 <Icon name="trash-2" size={18} />
                                                             </button>
                                                         </div>
-                                                        <span className={`text-xs px-2 py-1 rounded mb-3 inline-block ${exam.mode === 'mcq' ? 'bg-blue-500/20 text-blue-300' : exam.mode === 'essay' ? 'bg-purple-500/20 text-purple-300' : 'bg-green-500/20 text-green-300'}`}>
-                                                            {exam.mode === 'mcq' ? 'اختياري' : exam.mode === 'essay' ? 'مقالي' : 'واتساب'}
+                                                        <span className={`text-xs px-2 py-1 rounded mb-3 inline-block ${exam.type === 'mcq' ? 'bg-blue-500/20 text-blue-300' : exam.type === 'essay' ? 'bg-purple-500/20 text-purple-300' : 'bg-green-500/20 text-green-300'}`}>
+                                                            {exam.type === 'mcq' ? 'اختياري' : exam.type === 'essay' ? 'مقالي' : 'واتساب'}
                                                         </span>
                                                         <h3 className="font-bold text-lg mb-2 line-clamp-2">{exam.question}</h3>
                                                         <p className="text-sm text-slate-400 flex items-center gap-2">
                                                             <Icon name="users" size={14} /> للصف: {exam.grade === 'all' ? 'الكل' : exam.grade}
+                                                        </p>
+                                                        <p className="text-sm text-slate-400 flex items-center gap-2 mt-1">
+                                                            <Icon name="book-open" size={14} /> كورس: {dataState.courses.find(c => c.id === exam.courseId)?.title || 'غير معروف'}
                                                         </p>
                                                     </div>
                                                 ))
                                             )}
                                         </div>
                                     </div>
+                                )}
+
+                                {activeTab === 'whiteboards' && (
+                                    <WhiteboardManager
+                                        whiteboards={dataState.whiteboards}
+                                        onAddWhiteboard={addWhiteboard}
+                                        onDeleteWhiteboard={deleteWhiteboard}
+                                    />
                                 )}
 
                                 {activeTab === 'recordings' && (
@@ -3558,48 +4513,6 @@
                                                             if (confirm('حذف التسجيل؟')) window.rtdb.remove(window.rtdb.ref(window.db, 'recordings/' + rec.id));
                                                         }} className="text-red-400 hover:bg-white/10 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition">
                                                             <Icon name="trash-2" size={18} />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {activeTab === 'whiteboards' && (
-                                    <div className="space-y-6 animate-slide-up">
-                                        <div className="glass-panel p-6">
-                                            <h3 className="font-bold mb-4">إضافة سبورة (PDF/Image)</h3>
-                                            <input id="wbTitle" placeholder="عنوان السبورة" className="w-full bg-white/5 border border-white/10 p-3 rounded-xl mb-4" />
-                                            <input id="wbLink" placeholder="رابط الملف (Image/PDF)" className="w-full bg-white/5 border border-white/10 p-3 rounded-xl mb-4" />
-                                            <button onClick={() => {
-                                                const title = document.getElementById('wbTitle').value;
-                                                const link = document.getElementById('wbLink').value;
-                                                if (title && link) {
-                                                    uploadItem('whiteboards', { title, link });
-                                                    document.getElementById('wbTitle').value = '';
-                                                    document.getElementById('wbLink').value = '';
-                                                }
-                                            }} className="btn-main px-6 py-3 rounded-xl font-bold">نشر السبورة</button>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                            {dataState.whiteboards.map(wb => (
-                                                <div key={wb.id} className="glass-panel p-0 overflow-hidden group relative">
-                                                    <div className="h-40 bg-slate-900 relative">
-                                                        <img src={wb.link} className="w-full h-full object-cover opacity-50 hover:opacity-100 transition duration-500" onError={(e) => { e.target.src = 'https://placehold.co/400x300?text=PDF'; }} />
-                                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/50 backdrop-blur-sm">
-                                                            <a href={wb.link} target="_blank" className="bg-white text-black p-2 rounded-full transform hover:scale-110 transition">
-                                                                <Icon name="external-link" size={20} />
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                    <div className="p-3 bg-white/5 relative">
-                                                        <h4 className="font-bold text-sm truncate">{wb.title}</h4>
-                                                        <button onClick={() => {
-                                                            if (confirm('حذف السبورة؟')) window.rtdb.remove(window.rtdb.ref(window.db, 'whiteboards/' + wb.id));
-                                                        }} className="absolute top-2 left-2 text-red-400 hover:text-red-300 opacity-0 group-hover:opacity-100 transition">
-                                                            <Icon name="trash-2" size={16} />
                                                         </button>
                                                     </div>
                                                 </div>
@@ -3781,10 +4694,10 @@
                         )}
 
                         {selectedCourse && (
-                            <CoursePurchaseModal
-                                course={selectedCourse}
-                                onClose={() => setSelectedCourse(null)}
-                                teacherNumber={CONTACT_INFO.vodafoneNumber}
+                            <CoursePurchaseModal 
+                                course={selectedCourse} 
+                                onClose={() => setSelectedCourse(null)} 
+                                teacherNumber={CONTACT_INFO.vodafoneNumber} 
                                 user={user}
                                 onRequireLogin={() => {
                                     setSelectedCourse(null);
