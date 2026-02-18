@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2487,6 +2486,180 @@
             );
         };
 
+        // ✅ Course Manager Component (New Component for Admin)
+        const CourseManager = ({ courses, onAddCourse, onDeleteCourse, isSuperAdmin }) => {
+            const [showAddForm, setShowAddForm] = useState(false);
+            const [newCourse, setNewCourse] = useState({
+                title: '',
+                description: '',
+                price: 0,
+                duration: 30,
+                grade: '1sec',
+                image: 'https://via.placeholder.com/300x150?text=Course'
+            });
+
+            const handleInputChange = (e) => {
+                const { name, value } = e.target;
+                setNewCourse({ ...newCourse, [name]: value });
+            };
+
+            const handleSubmit = () => {
+                if (!newCourse.title || !newCourse.description || !newCourse.price) {
+                    alert('يرجى ملء جميع الحقول المطلوبة');
+                    return;
+                }
+                onAddCourse(newCourse);
+                setShowAddForm(false);
+                setNewCourse({
+                    title: '',
+                    description: '',
+                    price: 0,
+                    duration: 30,
+                    grade: '1sec',
+                    image: 'https://via.placeholder.com/300x150?text=Course'
+                });
+            };
+
+            return (
+                <div className="space-y-6 animate-slide-up">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-2xl font-bold flex items-center gap-2">
+                            <GlassIcon name="book-open" size={24} /> إدارة الكورسات
+                        </h2>
+                        <button onClick={() => setShowAddForm(true)} className="btn-main px-6 py-2 rounded-xl font-bold flex items-center gap-2">
+                            <Icon name="plus" size={18} /> إضافة كورس جديد
+                        </button>
+                    </div>
+
+                    {showAddForm && (
+                        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4" onClick={() => setShowAddForm(false)}>
+                            <div className="glass-panel p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                                <h3 className="text-2xl font-bold mb-6">إضافة كورس جديد</h3>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-bold mb-2">عنوان الكورس</label>
+                                        <input
+                                            name="title"
+                                            value={newCourse.title}
+                                            onChange={handleInputChange}
+                                            className="w-full p-3 bg-white/5 border border-white/10 rounded-xl"
+                                            placeholder="مثال: النحو والصرف للأول الثانوي"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-bold mb-2">الوصف</label>
+                                        <textarea
+                                            name="description"
+                                            value={newCourse.description}
+                                            onChange={handleInputChange}
+                                            className="w-full p-3 bg-white/5 border border-white/10 rounded-xl h-24 resize-none"
+                                            placeholder="وصف مختصر للكورس ومميزاته"
+                                        />
+                                    </div>
+                                    
+                                    <div className="grid md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-bold mb-2">السعر (جنيه)</label>
+                                            <input
+                                                type="number"
+                                                name="price"
+                                                value={newCourse.price}
+                                                onChange={handleInputChange}
+                                                className="w-full p-3 bg-white/5 border border-white/10 rounded-xl"
+                                                min="0"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-bold mb-2">المدة (أيام)</label>
+                                            <input
+                                                type="number"
+                                                name="duration"
+                                                value={newCourse.duration}
+                                                onChange={handleInputChange}
+                                                className="w-full p-3 bg-white/5 border border-white/10 rounded-xl"
+                                                min="1"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-bold mb-2">الصف</label>
+                                        <select
+                                            name="grade"
+                                            value={newCourse.grade}
+                                            onChange={handleInputChange}
+                                            className="w-full p-3 bg-white/5 border border-white/10 rounded-xl"
+                                        >
+                                            <option value="1sec">الصف الأول الثانوي</option>
+                                            <option value="2sec">الصف الثاني الثانوي</option>
+                                            <option value="3sec">الصف الثالث الثانوي</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-bold mb-2">صورة الكورس (رابط)</label>
+                                        <input
+                                            name="image"
+                                            value={newCourse.image}
+                                            onChange={handleInputChange}
+                                            className="w-full p-3 bg-white/5 border border-white/10 rounded-xl"
+                                            placeholder="رابط صورة الكورس"
+                                        />
+                                    </div>
+                                    
+                                    <div className="flex gap-3 pt-4">
+                                        <button onClick={() => setShowAddForm(false)} className="flex-1 py-3 bg-white/10 rounded-xl font-bold">
+                                            إلغاء
+                                        </button>
+                                        <button onClick={handleSubmit} className="flex-1 btn-main py-3 rounded-xl font-bold">
+                                            إضافة الكورس
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* قائمة الكورسات */}
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {courses.length === 0 ? (
+                            <div className="col-span-full text-center py-12 glass-panel">
+                                <GlassIcon name="book-open" size={48} className="mx-auto mb-4" />
+                                <p className="text-slate-400">لا توجد كورسات بعد</p>
+                            </div>
+                        ) : (
+                            courses.map(course => (
+                                <div key={course.id} className="bg-white/5 rounded-xl border border-white/10 overflow-hidden group relative">
+                                    <div className="h-40 bg-slate-800">
+                                        <img src={course.image} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition" />
+                                    </div>
+                                    <div className="p-4">
+                                        <h3 className="font-bold text-lg mb-2">{course.title}</h3>
+                                        <p className="text-sm text-slate-400 line-clamp-2 mb-3">{course.description}</p>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-brand-accent font-bold">{course.price} ج.م</span>
+                                            <span className="text-xs bg-white/10 px-2 py-1 rounded">
+                                                {course.grade === '1sec' ? 'أولى' : course.grade === '2sec' ? 'تانية' : 'تالتة'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        onClick={() => onDeleteCourse(course.id)}
+                                        className="absolute top-2 left-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg opacity-0 group-hover:opacity-100 transition"
+                                    >
+                                        <Icon name="trash-2" size={16} />
+                                    </button>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
         // ✅ Updated Lecture Manager with Course selection
         const LectureManager = ({ courses, onAddLecture, onDeleteLecture, isSuperAdmin }) => {
             const [showAddForm, setShowAddForm] = useState(false);
@@ -4745,5 +4918,4 @@
         root.render(<App />);
     </script>
 </body>
-
 </html>
